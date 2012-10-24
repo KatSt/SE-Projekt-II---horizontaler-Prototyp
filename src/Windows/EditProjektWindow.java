@@ -7,6 +7,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -27,12 +29,14 @@ import Actions.AlleFelderLeeren;
 import Actions.AlleFelderUebernehmen;
 import Actions.TextAreaUebernehmenButton;
 import Actions.UebernehmenButton;
+import DatenbankConnector.ConnectFirebirdDatabase;
 import Listener.TabChangeListener;
 import Listener.TextAreaFocusListener;
 import Listener.TextFieldFocusListener;
 import Objekt.Ansprechpartner;
 import Objekt.Projektantrag;
 import Objekt.Student;
+import Objekt.Unternehmen;
 import TableModel.AnsprechpartnerTableModel;
 
 /**
@@ -67,9 +71,15 @@ public class EditProjektWindow extends JDialog
    private Vector<JTextField> student3AdiuvoTextFields = new Vector<JTextField>();
    private Vector<JTextField> projektAdiuvoTextFields = new Vector<JTextField>();
    private Vector<JTextArea> projektAdiuvoTextAreas = new Vector<JTextArea>();
+   private Vector<JTextField> unternehmenAdiuvoTextFields = new Vector<JTextField>();
    
    private JScrollPane skizzeFirebirdScrollPane;
    private JScrollPane skizzeAWCScrollPane;
+   private Student adiuvoStudent1;
+   private Student adiuvoStudent2;
+   private Student adiuvoStudent3;
+   private Vector<Ansprechpartner> adiuvoAnsprechpartner;
+   private Vector<Unternehmen> adiuvoUnternehmen;
 
 //   private boolean exists;
 //   private String anredetextFirebird;
@@ -82,26 +92,6 @@ public class EditProjektWindow extends JDialog
 //   private String kommentarInternFirebird;
 //   private String internetseiteFirebird;
    
-  
-//   private JTextField beginnAWC;
-//   private JTextField beginnAdiuvo;   
-//   private JTextField endeAdiuvo;
-//   private JTextArea projektskizzeAdiuvo;
-//   private JTextArea projektskizzeAWC;   
-//   private JTextField kolloquiumAdiuvo;
-//   private JTextField noteAWC;
-//   private JTextField noteAdiuvo;
-//   private JTextField projektKommentarAdiuvo;
-//   private JTextField projektKommentarInternAdiuvo;
-//   private JTextField projektartAdiuvo;
-//   private JTextField projekttitelAWC;
-//   private JTextField projekttitelAdiuvo;
-//   private JTextField technologienAWC;
-//   private JTextField technologienAdiuvo;
-//   private JTextArea projekthintergrundAWC;
-//   private JTextArea projekthintergrundAdiuvo;
-//   private JTextArea projektbeschreibungAWC;
-//   private JTextArea projektbeschreibungAdiuvo;
    
    /**
     * 
@@ -115,6 +105,7 @@ public class EditProjektWindow extends JDialog
       setTitle(ptitel.toString());
       setModal(true);
       projekt = ptitel;
+      selectDataFromFirebird();
       init();
 //      pack();
       setResizable(true);
@@ -1742,11 +1733,13 @@ public class EditProjektWindow extends JDialog
       info3.add(plzAWC);
 
       JButton plzUebernehmen = new JButton(">");
+      plzUebernehmen.setPreferredSize(buttonDimension);
       plzUebernehmen.setHorizontalAlignment(SwingConstants.CENTER);
       info3.add(plzUebernehmen);
 
       JTextField plzFirebird = new JTextField();
       plzFirebird.setPreferredSize(textFieldDimension);
+      plzUebernehmen.setAction(new UebernehmenButton(plzAWC, plzFirebird));
       info3.add(plzFirebird);    
       tab.add(info3);
 
@@ -1762,11 +1755,13 @@ public class EditProjektWindow extends JDialog
       info4.add(ortAWC);
 
       JButton ortUebernehmen = new JButton(">");
+      ortUebernehmen.setPreferredSize(buttonDimension);
       ortUebernehmen.setHorizontalAlignment(SwingConstants.CENTER);
       info4.add(ortUebernehmen);
 
       JTextField ortFirebird = new JTextField();    
       ortFirebird.setPreferredSize(textFieldDimension);
+      ortUebernehmen.setAction(new UebernehmenButton(ortAWC, ortFirebird));
       info4.add(ortFirebird);      
       tab.add(info4);
 
@@ -1782,11 +1777,13 @@ public class EditProjektWindow extends JDialog
       info5.add(telefonAWC);
 
       JButton telefonUebernehmen = new JButton(">");
+      telefonUebernehmen.setPreferredSize(buttonDimension);
       telefonUebernehmen.setHorizontalAlignment(SwingConstants.CENTER);
       info5.add(telefonUebernehmen);
 
       JTextField telefonFirebird = new JTextField();
       telefonFirebird.setPreferredSize(textFieldDimension);
+      telefonUebernehmen.setAction(new UebernehmenButton(telefonAWC, telefonFirebird));
       info5.add(telefonFirebird);      
       tab.add(info5);
 
@@ -1802,11 +1799,13 @@ public class EditProjektWindow extends JDialog
       info6.add(emailAWC);
 
       JButton emailUebernehmen = new JButton(">");
+      emailUebernehmen.setPreferredSize(buttonDimension);
       emailUebernehmen.setHorizontalAlignment(SwingConstants.CENTER);
       info6.add(emailUebernehmen);
 
       JTextField emailFirebird = new JTextField();
       emailFirebird.setPreferredSize(textFieldDimension);
+      emailUebernehmen.setAction(new UebernehmenButton(emailAWC, emailFirebird));
       info6.add(emailFirebird);      
       tab.add(info6);
 
@@ -1822,11 +1821,13 @@ public class EditProjektWindow extends JDialog
       info7.add(faxAWC);
 
       JButton faxUebernehmen = new JButton(">");
+      faxUebernehmen.setPreferredSize(buttonDimension);
       faxUebernehmen.setHorizontalAlignment(SwingConstants.CENTER);
       info7.add(faxUebernehmen);
 
       JTextField faxFirebird = new JTextField();
       faxFirebird.setPreferredSize(textFieldDimension);
+      faxUebernehmen.setAction(new UebernehmenButton(faxAWC, faxFirebird));
       info7.add(faxFirebird);      
       tab.add(info7);
 
@@ -1842,11 +1843,13 @@ public class EditProjektWindow extends JDialog
       info8.add(internetseiteAWC);
 
       JButton internetseiteUebernehmen = new JButton(">");
+      internetseiteUebernehmen.setPreferredSize(buttonDimension);
       internetseiteUebernehmen.setHorizontalAlignment(SwingConstants.CENTER);
       info8.add(internetseiteUebernehmen);
 
       JTextField internetseiteFirebird = new JTextField();
       internetseiteFirebird.setPreferredSize(textFieldDimension);
+      internetseiteUebernehmen.setAction(new UebernehmenButton(internetseiteAWC, internetseiteFirebird));
       info8.add(internetseiteFirebird);      
       tab.add(info8);
 
@@ -1862,11 +1865,13 @@ public class EditProjektWindow extends JDialog
       info9.add(brancheAWC);
 
       JButton brancheUebernehmen = new JButton(">");
+      brancheUebernehmen.setPreferredSize(buttonDimension);
       brancheUebernehmen.setHorizontalAlignment(SwingConstants.CENTER);
       info9.add(brancheUebernehmen);
 
       JTextField brancheFirebird = new JTextField();
       brancheFirebird.setPreferredSize(textFieldDimension);
+      brancheUebernehmen.setAction(new UebernehmenButton(brancheAWC, brancheFirebird));
       info9.add(brancheFirebird);      
       tab.add(info9);
 
@@ -1883,17 +1888,19 @@ public class EditProjektWindow extends JDialog
       info10.add(kommentarAWC);
 
       JButton kommentarUebernehmen = new JButton(">");
+      kommentarUebernehmen.setPreferredSize(buttonDimension);
       kommentarUebernehmen.setHorizontalAlignment(SwingConstants.CENTER);
       info10.add(kommentarUebernehmen);
 
       JTextField kommentarFirebird = new JTextField();
       kommentarFirebird.setPreferredSize(textFieldDimension);
+      kommentarUebernehmen.setAction(new UebernehmenButton(kommentarAWC, kommentarFirebird));
       info10.add(kommentarFirebird);      
       tab.add(info10);
       
    // JPanel Kommentar intern
       JPanel info11 = new JPanel(new FlowLayout());
-      JLabel kommentarIntern = new JLabel("Kommentar:");
+      JLabel kommentarIntern = new JLabel("Kommentar intern:");
       kommentarIntern.setPreferredSize(labelDimension);
       info11.add(kommentarIntern);
 
@@ -1903,11 +1910,13 @@ public class EditProjektWindow extends JDialog
       info11.add(kommentarInternAWC);
 
       JButton kommentarInternUebernehmen = new JButton(">");
+      kommentarInternUebernehmen.setPreferredSize(buttonDimension);
       kommentarInternUebernehmen.setHorizontalAlignment(SwingConstants.CENTER);
       info11.add(kommentarInternUebernehmen);
 
       JTextField kommentarInternFirebird = new JTextField();
       kommentarInternFirebird.setPreferredSize(textFieldDimension);
+      kommentarInternUebernehmen.setAction(new UebernehmenButton(kommentarInternAWC, kommentarInternFirebird));
       info11.add(kommentarInternFirebird);      
       tab.add(info11);
 
@@ -1929,7 +1938,47 @@ public class EditProjektWindow extends JDialog
       alleFelderLeerenPanel.add(alleLeeren);
       buttonPanel.add(alleFelderLeerenPanel);
       tab.add(buttonPanel);
-
+      
+      nameAWC.setText(projekt.getAnsprechpartner().getUnternehmen().getName());
+      strasseHausnrAWC.setText(projekt.getAnsprechpartner().getUnternehmen().getStraﬂeHausnr());
+      plzAWC.setText(projekt.getAnsprechpartner().getUnternehmen().getpLZ());
+      ortAWC.setText(projekt.getAnsprechpartner().getUnternehmen().getOrt());
+      telefonAWC.setText(projekt.getAnsprechpartner().getUnternehmen().getTelefon());
+      emailAWC.setText(projekt.getAnsprechpartner().getUnternehmen().getEmail());
+      faxAWC.setText(projekt.getAnsprechpartner().getUnternehmen().getFax());
+      internetseiteAWC.setText(projekt.getAnsprechpartner().getUnternehmen().getFax());
+      brancheAWC.setText(projekt.getAnsprechpartner().getUnternehmen().getBranche());
+      kommentarAWC.setText(projekt.getAnsprechpartner().getUnternehmen().getKommentar());
+      kommentarInternAWC.setText(projekt.getAnsprechpartner().getUnternehmen().getKommentarIntern());
+      
+      Vector<JTextField> awcTextFields = new Vector<JTextField>();
+      awcTextFields.add(nameAWC);
+      awcTextFields.add(strasseHausnrAWC);
+      awcTextFields.add(plzAWC);
+      awcTextFields.add(ortAWC);
+      awcTextFields.add(telefonAWC);
+      awcTextFields.add(emailAWC);
+      awcTextFields.add(faxAWC);
+      awcTextFields.add(internetseiteAWC);
+      awcTextFields.add(brancheAWC);
+      awcTextFields.add(kommentarAWC);
+      awcTextFields.add(kommentarInternAWC);
+      
+      unternehmenAdiuvoTextFields.add(nameFirebird);
+      unternehmenAdiuvoTextFields.add(strasseHausnrFirebird);
+      unternehmenAdiuvoTextFields.add(plzFirebird);
+      unternehmenAdiuvoTextFields.add(ortFirebird);
+      unternehmenAdiuvoTextFields.add(telefonFirebird);
+      unternehmenAdiuvoTextFields.add(emailFirebird);
+      unternehmenAdiuvoTextFields.add(faxFirebird);
+      unternehmenAdiuvoTextFields.add(internetseiteFirebird);
+      unternehmenAdiuvoTextFields.add(brancheFirebird);
+      unternehmenAdiuvoTextFields.add(kommentarFirebird);
+      unternehmenAdiuvoTextFields.add(kommentarInternFirebird);
+      
+      alleUebernehmen.setAction(new AlleFelderUebernehmen(awcTextFields, unternehmenAdiuvoTextFields, null, null));
+      alleLeeren.setAction(new AlleFelderLeeren(unternehmenAdiuvoTextFields, null));
+      
 
       return scrollPanetab;
    }
@@ -1994,35 +2043,89 @@ public class EditProjektWindow extends JDialog
    {
       this.tab6 = tab6;
    }
-
-//   /**
-//    * 
-//    * Selektiert einen Studenten aus der AWC Datenbank.
-//    *
-//    * @return   ResultSet mit dem Studenten
-//    */
-//   private ResultSet selectStudentFromAWC()
-//   {
-//      ResultSet rs;
-//      rs = ConnectMySQLDatabase.getInstance().query("SELECT * FROM student WHERE matrikelnummer = '10021892'");
-//      return rs;
-//   }
-//
-//
-//   /**
-//    * 
-//    * Selektiert, wenn vorhanden, den gleichen Studenten aus der Firebird Datenbank.
-//    *
-//    * @param matrikelnummer     Matrikelnummer des Studenten.
-//    * @return   ResultSet mit dem Studenten.
-//    */
-//   private ResultSet selectStudentFromFirebird(String matrikelnummer)
-//   {
-//      ResultSet rs;
-//      rs = ConnectFirebirdDatabase.getInstance().query("SELECT Anrede, Vorname, Nachname, Matrikelnummer " +
-//            ", Email, Telefon, Kommentar, Kommentarintern, Internetseite FROM student WHERE matrikelnummer = '" + matrikelnummer + "'");
-//      return rs;
-//   }
+   
+   /**
+    * 
+    * Selektiert, wenn vorhanden, den gleichen Studenten aus der Firebird Datenbank.
+    *
+    * @param matrikelnummer     Matrikelnummer des Studenten.
+    * @return   ResultSet mit dem Studenten.
+    */
+   private void selectDataFromFirebird()
+   {
+      ResultSet rs = ConnectFirebirdDatabase.getInstance().query("SELECT * FROM student WHERE matrikelnummer = '" + 
+            projekt.getStudent1().getMatrikelnummer() + "'");
+      
+      ResultSet rs2 = null;
+      if(projekt.getStudent2() != null)
+      {
+         rs2 = ConnectFirebirdDatabase.getInstance().query("SELECT * FROM student WHERE matrikelnummer = '" + 
+               projekt.getStudent2().getMatrikelnummer() + "'");
+      }
+      ResultSet rs3 = null;
+      if(projekt.getStudent3() != null)
+      {
+         rs3 = ConnectFirebirdDatabase.getInstance().query("SELECT * FROM student WHERE matrikelnummer = '" + 
+               projekt.getStudent3().getMatrikelnummer() + "'");
+      }
+      try
+      {
+         while(rs.next())
+         {
+            adiuvoStudent1 = new Student(rs.getInt("id"), rs.getString("anrede"), rs.getString("vorname"), rs.getString("nachname"), 
+                  rs.getString("matrikelnummer"), rs.getString("email"), rs.getString("telefon"));
+         }
+         if(rs2 != null)
+         {
+            while(rs2.next())
+            {
+               adiuvoStudent2 = new Student(rs2.getInt("id"), rs2.getString("anrede"), rs2.getString("vorname"), rs2.getString("nachname"), 
+                     rs2.getString("matrikelnummer"), rs2.getString("email"), rs2.getString("telefon")); 
+            }
+         }
+         if(rs3 != null)
+         {
+            while(rs3.next())
+            {
+               adiuvoStudent3 = new Student(rs3.getInt("id"), rs3.getString("anrede"), rs3.getString("vorname"), rs3.getString("nachname"), 
+                     rs3.getString("matrikelnummer"), rs3.getString("email"), rs3.getString("telefon")); 
+            }
+         }
+      }
+      catch(SQLException ex)
+      {
+         ex.printStackTrace();
+      }
+      
+      rs = ConnectFirebirdDatabase.getInstance().query("SELECT * FROM ansprechpartner WHERE nachname = '" +
+            projekt.getAnsprechpartner().getName() + "' AND vorname = '" + projekt.getAnsprechpartner().getVorname() + "'");
+      rs2 = ConnectFirebirdDatabase.getInstance().query("SELECT * FROM organisation WHERE name = '" + 
+            projekt.getAnsprechpartner().getUnternehmen().getName() + "'");
+      try
+      {
+         while(rs.next())
+         {
+            Ansprechpartner ansp = new Ansprechpartner(rs.getInt("id"), rs.getString("titel"), 
+            rs.getString("vorname"), rs.getString("nachname"), rs.getString("position"), rs.getString("abteilung"), 
+            rs.getString("telefon1"), rs.getString("telefon2"), rs.getString("mobil"), rs.getString("fax"), rs.getString("email"),
+            rs.getString("kommentar"));            
+            adiuvoAnsprechpartner.add(ansp);
+            
+            Unternehmen unt = new Unternehmen(rs2.getInt("id"), rs2.getString("name"), rs2.getString("strasseHausnr"), rs2.getString("plz"), 
+                  rs2.getString("ort"), rs2.getString("telefon"), rs2.getString("email"), rs3.getString("fax"), rs2.getString("web"), 
+                  rs2.getString("branche"), rs2.getString("kommentar"), rs2.getString("kommentarintern"));
+            adiuvoUnternehmen.add(unt);
+         }
+      }
+      catch(SQLException ex)
+      {
+         ex.printStackTrace();
+      }
+      
+      System.out.println("Student1 : " + adiuvoStudent1.getName() + " " + adiuvoStudent1.getMatrikelnummer());
+      System.out.println("Student2 : " + adiuvoStudent2.getName() + " " + adiuvoStudent2.getMatrikelnummer());
+      
+   }
 
 //   private void setFirebirdStrings()
 //   {
@@ -2034,3 +2137,4 @@ public class EditProjektWindow extends JDialog
 //      telefonFirebird = studenttelefonFirebird.getText();
 //   }
 }
+

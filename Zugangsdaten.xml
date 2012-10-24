@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><Zugangsdaten><FirebirdConnection Benutzername="SYSDBA" Host="localhost" Passwort="masterkey" Pfad="C:/Users/1/Desktop/Firebird Datenbank/BeispielAdiuvoDatabase.gdb" Port="3050"/><MySQLConnection Benutzername="root" Datenbank="awc" Host="localhost" Passwort="" Port="3306"/></Zugangsdaten>

@@ -6,6 +6,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,7 +25,12 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
 
 import Actions.AlleFelderLeeren;
 import Actions.AlleFelderUebernehmen;
@@ -38,6 +45,7 @@ import Objekt.Projektantrag;
 import Objekt.Student;
 import Objekt.Unternehmen;
 import TableModel.AnsprechpartnerTableModel;
+import TableModel.UnternehmenTableModel;
 
 /**
  * 
@@ -72,25 +80,17 @@ public class EditProjektWindow extends JDialog
    private Vector<JTextField> projektAdiuvoTextFields = new Vector<JTextField>();
    private Vector<JTextArea> projektAdiuvoTextAreas = new Vector<JTextArea>();
    private Vector<JTextField> unternehmenAdiuvoTextFields = new Vector<JTextField>();
+   private Vector<JTextField> ansprechpartnerAdiuvoTextFields = new Vector<JTextField>();
    
    private JScrollPane skizzeFirebirdScrollPane;
    private JScrollPane skizzeAWCScrollPane;
    private Student adiuvoStudent1;
    private Student adiuvoStudent2;
    private Student adiuvoStudent3;
-   private Vector<Ansprechpartner> adiuvoAnsprechpartner;
-   private Vector<Unternehmen> adiuvoUnternehmen;
-
-//   private boolean exists;
-//   private String anredetextFirebird;
-//   private String nameFirebird;
-//   private String vornameFirebird;
-//   private String matrikelnummerFirebird;
-//   private String emailFirebird;
-//   private String telefonFirebird;
-//   private String kommentarAdiuvo;
-//   private String kommentarInternFirebird;
-//   private String internetseiteFirebird;
+   private Vector<Ansprechpartner> adiuvoAnsprechpartnerVector = new Vector<Ansprechpartner>();
+   private Vector<Unternehmen> adiuvoUnternehmenVector = new Vector<Unternehmen>();
+//   private Ansprechpartner adiuvoAnsprechpartner;
+//   private Unternehmen adiuvoUnternehmen;
    
    
    /**
@@ -118,22 +118,34 @@ public class EditProjektWindow extends JDialog
     */
    private void init()
    {
-      setLocation(150, 100);      
+    
       setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-      setSize(900, 600);
+      if(Toolkit.getDefaultToolkit().getScreenSize().width < 900 || Toolkit.getDefaultToolkit().getScreenSize().height < 600)
+      {
+       setSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width, Toolkit.getDefaultToolkit().getScreenSize().height-40));
+      }
+      else
+      {
+         setSize(900, 600);
+      }
 
+      int x = Toolkit.getDefaultToolkit().getScreenSize().width / 2 - this.getWidth() / 2;
+      int y = Toolkit.getDefaultToolkit().getScreenSize().height / 2 - this.getHeight() / 2;
+      Point p = new Point(x, y);
+      setLocation(p);  
+      
       JTabbedPane tabbedPane = new JTabbedPane();
       tabbedPane.addChangeListener(new TabChangeListener(this));
 
       tabbedPane.add("Projekt", initProjektTab());
-      tabbedPane.add("Student 1", initStudentTab1(projekt.getStudent1(), student1AdiuvoAWCTextFields, student1AdiuvoTextFields));
+      tabbedPane.add("Student 1", initStudentTab1(projekt.getStudent1(), student1AdiuvoAWCTextFields, student1AdiuvoTextFields, adiuvoStudent1));
       if(projekt.getStudent2() != null)
       {
-         tabbedPane.add("Student 2", initStudentTab1(projekt.getStudent2(), student2AdiuvoAWCTextFields, student2AdiuvoTextFields));
+         tabbedPane.add("Student 2", initStudentTab1(projekt.getStudent2(), student2AdiuvoAWCTextFields, student2AdiuvoTextFields, adiuvoStudent2));
       }
       if(projekt.getStudent3() != null)
       {
-         tabbedPane.add("Student 3", initStudentTab1(projekt.getStudent3(), student3AdiuvoAWCTextFields, student3AdiuvoTextFields));
+         tabbedPane.add("Student 3", initStudentTab1(projekt.getStudent3(), student3AdiuvoAWCTextFields, student3AdiuvoTextFields, adiuvoStudent3));
       }
 
       tabbedPane.add("Ansprechpartner", initAnsprechpartnerTab(projekt.getAnsprechpartner()));
@@ -338,7 +350,7 @@ public class EditProjektWindow extends JDialog
     *
     * @return   JScrollPane mit Studentendaten.
     */
-   private JScrollPane initStudentTab1(Student student, Vector<JTextField> alleFelderAdiuvoAWC, Vector<JTextField> alleFelderAdiuvo)
+   private JScrollPane initStudentTab1(Student student, Vector<JTextField> alleFelderAdiuvoAWC, Vector<JTextField> alleFelderAdiuvo, Student adiuvoStudent)
    {
       
       Vector<JTextField> alleFelderAWC = new Vector<JTextField>();
@@ -580,6 +592,13 @@ public class EditProjektWindow extends JDialog
       studentmatrikelnrAWC.setText(student.getMatrikelnummer());
       studentemailAWC.setText(student.getEmail());
       studenttelefonAWC.setText(student.getTelefon());
+      
+      studentanredeFirebird.setText(adiuvoStudent.getAnrede());
+      studentnameFirebird.setText(adiuvoStudent.getName());
+      studentvornameFirebird.setText(adiuvoStudent.getVorname());
+      studentmatrikelnrFirebird.setText(adiuvoStudent.getMatrikelnummer());
+      studentemailFirebird.setText(adiuvoStudent.getEmail());
+      studenttelefonFirebird.setText(adiuvoStudent.getTelefon());
 
       // Buttons
       JPanel buttonPanel = new JPanel(new FlowLayout());
@@ -605,242 +624,6 @@ public class EditProjektWindow extends JDialog
       return scrollPanetab1;
    }   
 
-   private void initStudentTab2()
-   {
-//
-//      Box tab = Box.createVerticalBox();
-//      Dimension labelDimension = new Dimension(130, 16);
-//      Dimension textFieldDimension = new Dimension(300, 30);
-//      Dimension buttonDimension = new Dimension (55,26);      
-//      
-//      JScrollPane scrollPanetab = new JScrollPane(tab);
-//
-//      // JPanel ‹berschriften
-//      JPanel ueberschriften = new JPanel(new FlowLayout());
-//      JLabel empty = new JLabel();
-//      empty.setPreferredSize(labelDimension);
-//      ueberschriften.add(empty);
-//
-//      JLabel awc = new JLabel("AWC");
-//      awc.setHorizontalAlignment(SwingConstants.CENTER);
-//      awc.setPreferredSize(textFieldDimension);
-//      ueberschriften.add(awc);
-//
-//      JLabel empty2 = new JLabel();
-//      empty2.setPreferredSize(buttonDimension);
-//      ueberschriften.add(empty2);
-//
-//      JLabel adiuvo = new JLabel("Adiuvo");
-//      adiuvo.setHorizontalAlignment(SwingConstants.CENTER);
-//      adiuvo.setPreferredSize(textFieldDimension);
-//      ueberschriften.add(adiuvo);
-//
-//      tab.add(ueberschriften);
-//      
-//      // JPanel Anrede
-//      JPanel info1 = new JPanel();
-//      info1.setLayout(new FlowLayout());
-//      JLabel studentanrede = new JLabel("Anrede:");
-//      studentanrede.setPreferredSize(labelDimension);
-//      info1.add(studentanrede);
-//
-//      JTextField studentanredeAWC = new JTextField();
-//      studentanredeAWC.setEditable(false);
-//      studentanredeAWC.setPreferredSize(textFieldDimension);      
-//      info1.add(studentanredeAWC);
-//
-//      JButton anredeUebernehmen = new JButton(">");
-//      anredeUebernehmen.setPreferredSize(buttonDimension);
-//      anredeUebernehmen.setHorizontalAlignment(SwingConstants.CENTER);
-//      info1.add(anredeUebernehmen);
-//
-//      JTextField studentanredeFirebird = new JTextField();
-//      studentanredeFirebird.setPreferredSize(textFieldDimension);
-//      info1.add(studentanredeFirebird);
-//      tab.add(info1);
-//
-//      // JPanel Name      
-//      JPanel info2 = new JPanel(new FlowLayout());
-//      JLabel studentname = new JLabel("Name:");
-//      studentname.setPreferredSize(labelDimension);
-//      info2.add(studentname);
-//
-//      JTextField studentnameAWC = new JTextField();
-//      studentnameAWC.setEditable(false);
-//      studentnameAWC.setPreferredSize(textFieldDimension);
-//      info2.add(studentnameAWC);
-//
-//      JButton nameUebernehmen = new JButton(">");
-//      nameUebernehmen.setPreferredSize(buttonDimension);
-//      nameUebernehmen.setHorizontalAlignment(SwingConstants.CENTER);
-//      info2.add(nameUebernehmen);
-//
-//      JTextField studentnameFirebird = new JTextField();
-//      studentnameFirebird.setPreferredSize(textFieldDimension);
-//      info2.add(studentnameFirebird);    
-//      tab.add(info2);
-//
-//      // JPanel Vorname
-//      JPanel info3 = new JPanel(new FlowLayout());
-//      JLabel studentvorname = new JLabel("Vorname:");
-//      studentvorname.setPreferredSize(labelDimension);
-//      info3.add(studentvorname);
-//
-//      JTextField studentvornameAWC = new JTextField();
-//      studentvornameAWC.setEditable(false);
-//      studentvornameAWC.setPreferredSize(textFieldDimension);
-//      info3.add(studentvornameAWC);
-//
-//      JButton vornameUebernehmen = new JButton(">");
-//      vornameUebernehmen.setPreferredSize(buttonDimension);
-//      vornameUebernehmen.setHorizontalAlignment(SwingConstants.CENTER);
-//      info3.add(vornameUebernehmen);
-//
-//      JTextField studentvornameFirebird = new JTextField();
-//      studentvornameFirebird.setPreferredSize(textFieldDimension);
-//      info3.add(studentvornameFirebird);    
-//      tab.add(info3);
-//
-//      // JPanel Matrikelnummer
-//      JPanel info4 = new JPanel(new FlowLayout());
-//      JLabel studentmatrikelnr = new JLabel("Matrikelnummer:");
-//      studentmatrikelnr.setPreferredSize(labelDimension);
-//      info4.add(studentmatrikelnr);
-//
-//      JTextField studentmatrikelnrAWC = new JTextField();
-//      studentmatrikelnrAWC.setEditable(false);
-//      studentmatrikelnrAWC.setPreferredSize(textFieldDimension);
-//      info4.add(studentmatrikelnrAWC);
-//
-//      JButton matrikelnrUebernehmen = new JButton(">");
-//      matrikelnrUebernehmen.setPreferredSize(buttonDimension);
-//      matrikelnrUebernehmen.setHorizontalAlignment(SwingConstants.CENTER);
-//      info4.add(matrikelnrUebernehmen);
-//
-//      JTextField studentmatrikelnrFirebird = new JTextField();
-//      studentmatrikelnrFirebird.setPreferredSize(textFieldDimension);
-//      studentmatrikelnrFirebird.setEditable(false);
-//      info4.add(studentmatrikelnrFirebird);      
-//      tab.add(info4);
-//
-//      // JPanel Email
-//      JPanel info5 = new JPanel(new FlowLayout());
-//      JLabel studentemail = new JLabel("Email:");
-//      studentemail.setPreferredSize(labelDimension);
-//      info5.add(studentemail);
-//
-//      JTextField studentemailAWC = new JTextField();
-//      studentemailAWC.setEditable(false);
-//      studentemailAWC.setPreferredSize(textFieldDimension);
-//      info5.add(studentemailAWC);
-//
-//      JButton emailUebernehmen = new JButton(">");
-//      emailUebernehmen.setPreferredSize(buttonDimension);
-//      emailUebernehmen.setHorizontalAlignment(SwingConstants.CENTER);
-//      info5.add(emailUebernehmen);
-//
-//      JTextField studentemailFirebird = new JTextField();
-//      studentemailFirebird.setPreferredSize(textFieldDimension);
-//      info5.add(studentemailFirebird);      
-//      tab.add(info5);
-//
-//      // JPanel Telefon
-//      JPanel info6 = new JPanel(new FlowLayout());
-//      JLabel studenttelefon = new JLabel("Telefon:");
-//      studenttelefon.setPreferredSize(labelDimension);
-//      info6.add(studenttelefon);
-//
-//      JTextField studenttelefonAWC = new JTextField();
-//      studenttelefonAWC.setEditable(false);
-//      studenttelefonAWC.setPreferredSize(textFieldDimension);
-//      info6.add(studenttelefonAWC);
-//
-//      JButton telefonUebernehmen = new JButton(">");
-//      telefonUebernehmen.setPreferredSize(buttonDimension);
-//      telefonUebernehmen.setHorizontalAlignment(SwingConstants.CENTER);
-//      info6.add(telefonUebernehmen);
-//
-//      JTextField studenttelefonFirebird = new JTextField();
-//      studenttelefonFirebird.setPreferredSize(textFieldDimension);
-//      info6.add(studenttelefonFirebird);  
-//      tab.add(info6);
-//      
-//      // JPanel Internetseite
-//      JPanel info9 = new JPanel(new FlowLayout());
-//      JLabel studentinternetseite = new JLabel("Internetseite:");
-//      studentinternetseite.setPreferredSize(labelDimension);
-//      info9.add(studentinternetseite);
-//
-//      JPanel studentinternetseiteAWC = new JPanel();
-//      studentinternetseiteAWC.setPreferredSize(new Dimension(textFieldDimension.width + buttonDimension.width + 5, textFieldDimension.height));
-//      info9.add(studentinternetseiteAWC);
-//
-//      JTextField studentinternetseiteFirebird = new JTextField();
-//      studentinternetseiteFirebird.setPreferredSize(textFieldDimension);
-//      info9.add(studentinternetseiteFirebird);      
-//      tab.add(info9);
-//      
-//   // JPanel Kommentar
-//      JPanel info7 = new JPanel(new FlowLayout());
-//      JLabel studentkommentar = new JLabel("Kommentar:");
-//      studentkommentar.setPreferredSize(labelDimension);
-//      info7.add(studentkommentar);
-//
-//      JPanel studentkommentarAWC = new JPanel();
-//      studentkommentarAWC.setPreferredSize(textFieldDimension);
-//      info7.add(studentkommentarAWC);
-//
-//      JPanel button7 = new JPanel(new FlowLayout());
-//      button7.setPreferredSize(buttonDimension);
-//      info7.add(button7);
-//
-//      JTextField kommentarFirebird = new JTextField();
-//      kommentarFirebird.setPreferredSize(textFieldDimension);
-//      info7.add(kommentarFirebird);      
-//      tab.add(info7);
-//      
-//      // JPanel Kommentar Intern
-//      JPanel info8 = new JPanel(new FlowLayout());
-//      JLabel studentkommentarIntern = new JLabel("Kommentar intern:");
-//      studentkommentarIntern.setPreferredSize(labelDimension);
-//      info8.add(studentkommentarIntern);
-//
-//      JPanel studentkommentarInternAWC = new JPanel();
-//      studentkommentarInternAWC.setPreferredSize(textFieldDimension);
-//      info8.add(studentkommentarInternAWC);
-//
-//      JPanel button8 = new JPanel(new FlowLayout());
-//      button8.setPreferredSize(buttonDimension);
-//      info8.add(button8);
-//
-//      JTextField kommentarInternFirebird = new JTextField();
-//      kommentarInternFirebird.setPreferredSize(textFieldDimension);
-//      info8.add(kommentarInternFirebird);      
-//      tab.add(info8);
-//            
-//      
-//      // Buttons
-//      JPanel buttonPanel = new JPanel(new FlowLayout());
-//      JLabel emptyButton = new JLabel();
-//      emptyButton.setPreferredSize(new Dimension(labelDimension.width + textFieldDimension.width + 5, 30));
-//      buttonPanel.add(emptyButton);
-//
-//      JButton alleUebernehmen = new JButton("Alle");
-//      alleUebernehmen.setPreferredSize(buttonDimension);
-//      buttonPanel.add(alleUebernehmen);      
-//
-//      JPanel alleFelderLeerenPanel = new JPanel();
-//      alleFelderLeerenPanel.setLayout(new BoxLayout(alleFelderLeerenPanel, BoxLayout.Y_AXIS));
-//      alleFelderLeerenPanel.setPreferredSize(new Dimension(textFieldDimension.getSize().width, 28));
-//      JButton alleLeeren = new JButton("Alle Felder leeren");
-//      alleLeeren.setAlignmentX(Component.CENTER_ALIGNMENT);
-//      alleFelderLeerenPanel.add(alleLeeren);
-//      buttonPanel.add(alleFelderLeerenPanel);
-//      tab.add(buttonPanel);
-//
-//      return scrollPanetab;
-//
-   }
    /**
     * 
     * Initialisiet den Tab mit den Projektdaten.
@@ -1261,22 +1044,28 @@ public class EditProjektWindow extends JDialog
       ueberschriften.add(adiuvo);
 
       tab.add(ueberschriften);      
-     
+
+
       // JPanel Auswahl
-      JPanel ansprechpartnerAuswahl = new JPanel(new FlowLayout());
-      JLabel empty3 = new JLabel();
-      empty3.setPreferredSize(new Dimension(labelDimension.width + textFieldDimension.width + buttonDimension.width, 10));
-      ansprechpartnerAuswahl.add(empty3);
-      
-      AnsprechpartnerTableModel ansprechpartnerTableModel = new AnsprechpartnerTableModel();
-      JTable ansprechpartnerAuswahlTable = new JTable(ansprechpartnerTableModel);
-      ansprechpartnerAuswahlTable.setEnabled(false);
-      JScrollPane ansprechpartnerTablePane = new JScrollPane(ansprechpartnerAuswahlTable);
-      ansprechpartnerTablePane.setPreferredSize(new Dimension(textFieldDimension.width, 80));
-      ansprechpartnerAuswahl.add(ansprechpartnerTablePane);
-      
-      tab.add(ansprechpartnerAuswahl);
-      
+      if(adiuvoAnsprechpartnerVector.size() > 1)
+      {
+         JPanel ansprechpartnerAuswahl = new JPanel(new FlowLayout());
+         JLabel empty3 = new JLabel();
+         empty3.setPreferredSize(new Dimension(labelDimension.width + textFieldDimension.width + buttonDimension.width, 10));
+         ansprechpartnerAuswahl.add(empty3);
+
+         AnsprechpartnerTableModel ansprechpartnerTableModel = new AnsprechpartnerTableModel(adiuvoAnsprechpartnerVector);
+         JTable ansprechpartnerAuswahlTable = new JTable(ansprechpartnerTableModel);
+         ansprechpartnerAuswahlTable.setEnabled(false);
+
+         JScrollPane ansprechpartnerTablePane = new JScrollPane(ansprechpartnerAuswahlTable);
+         packColumn(ansprechpartnerAuswahlTable, 1, ansprechpartnerTableModel);
+         ansprechpartnerTablePane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+         ansprechpartnerTablePane.setPreferredSize(new Dimension(textFieldDimension.width, 80));
+         ansprechpartnerAuswahl.add(ansprechpartnerTablePane);
+
+         tab.add(ansprechpartnerAuswahl);
+      }
       // Buttons
       JPanel buttonPanel = new JPanel(new FlowLayout());
       JLabel emptyButton = new JLabel();
@@ -1608,6 +1397,7 @@ public class EditProjektWindow extends JDialog
       telefon3AWC.setText(ansprechpartner.getMobil());
       emailAWC.setText(ansprechpartner.getEmail());
       faxAWC.setText(ansprechpartner.getFax());
+      kommentarAWC.setText(ansprechpartner.getKommentar());
       
       alleAWCFelder.add(anredeAWC);
       alleAWCFelder.add(titelAWC);
@@ -1635,7 +1425,26 @@ public class EditProjektWindow extends JDialog
       alleAdiuvoFelder.add(faxFirebird);
       alleAdiuvoFelder.add(kommentarFirebird);
       
-      alleLeeren.setAction(new AlleFelderLeeren(alleAdiuvoFelder, null));
+      ansprechpartnerAdiuvoTextFields = alleAdiuvoFelder;
+      ansprechpartnerAdiuvoTextFields.add(internetseiteFirebird);
+      ansprechpartnerAdiuvoTextFields.add(kommentarInternFirebird);
+      
+      if(adiuvoAnsprechpartnerVector.size() == 1 && adiuvoAnsprechpartnerVector.get(0) != null)
+      {
+         anredeFirebird.setText("");
+         titelFirebird.setText(adiuvoAnsprechpartnerVector.get(0).getTitel());
+         vornameFirebird.setText(adiuvoAnsprechpartnerVector.get(0).getVorname());
+         nameFirebird.setText(adiuvoAnsprechpartnerVector.get(0).getName());
+         positionFirebird.setText(adiuvoAnsprechpartnerVector.get(0).getPosition());
+         abteilungFirebird.setText(adiuvoAnsprechpartnerVector.get(0).getAbteilung());
+         telefon1Firebird.setText(adiuvoAnsprechpartnerVector.get(0).getTelefon1());
+         telefon2Firebird.setText(adiuvoAnsprechpartnerVector.get(0).getTelefon2());
+         telefon3Firebird.setText(adiuvoAnsprechpartnerVector.get(0).getMobil());
+         emailFirebird.setText(adiuvoAnsprechpartnerVector.get(0).getEmail());
+         faxFirebird.setText(adiuvoAnsprechpartnerVector.get(0).getFax());
+         kommentarFirebird.setText(adiuvoAnsprechpartnerVector.get(0).getKommentar());
+      }
+      alleLeeren.setAction(new AlleFelderLeeren(ansprechpartnerAdiuvoTextFields, null));
       alleUebernehmen.setAction(new AlleFelderUebernehmen(alleAWCFelder, alleAdiuvoFelder, null, null));
       
       tab.add(info14);
@@ -1674,9 +1483,26 @@ public class EditProjektWindow extends JDialog
       adiuvo.setHorizontalAlignment(SwingConstants.CENTER);
       adiuvo.setPreferredSize(textFieldDimension);
       ueberschriften.add(adiuvo);
-      
+
       tab.add(ueberschriften);
 
+      // JPanel Auswahl
+      if(adiuvoUnternehmenVector.size() > 1)
+      {
+         JPanel unternehmenAuswahl = new JPanel(new FlowLayout());
+         JLabel empty3 = new JLabel();
+         empty3.setPreferredSize(new Dimension(labelDimension.width + textFieldDimension.width + buttonDimension.width, 10));
+         unternehmenAuswahl.add(empty3);
+
+         UnternehmenTableModel unternehmenTableModel = new UnternehmenTableModel(adiuvoUnternehmenVector);
+         JTable ansprechpartnerAuswahlTable = new JTable(unternehmenTableModel);
+         ansprechpartnerAuswahlTable.setEnabled(false);
+         JScrollPane ansprechpartnerTablePane = new JScrollPane(ansprechpartnerAuswahlTable);
+         ansprechpartnerTablePane.setPreferredSize(new Dimension(textFieldDimension.width, 80));
+         unternehmenAuswahl.add(ansprechpartnerTablePane);
+
+         tab.add(unternehmenAuswahl);
+      }
       // JPanel Name
       JPanel info1 = new JPanel(new FlowLayout());
       JLabel name = new JLabel("Name:");
@@ -1976,6 +1802,20 @@ public class EditProjektWindow extends JDialog
       unternehmenAdiuvoTextFields.add(kommentarFirebird);
       unternehmenAdiuvoTextFields.add(kommentarInternFirebird);
       
+      if(adiuvoUnternehmenVector.size() == 1 && adiuvoUnternehmenVector.get(0) != null)
+      {
+         nameFirebird.setText(adiuvoUnternehmenVector.get(0).getName());
+         strasseHausnrFirebird.setText(adiuvoUnternehmenVector.get(0).getStraﬂeHausnr());
+         plzFirebird.setText(adiuvoUnternehmenVector.get(0).getpLZ());
+         ortFirebird.setText(adiuvoUnternehmenVector.get(0).getOrt());
+         telefonFirebird.setText(adiuvoUnternehmenVector.get(0).getTelefon());
+         emailFirebird.setText(adiuvoUnternehmenVector.get(0).getEmail());
+         internetseiteFirebird.setText(adiuvoUnternehmenVector.get(0).getInternetseite());
+         brancheFirebird.setText(adiuvoUnternehmenVector.get(0).getBranche());
+         kommentarFirebird.setText(adiuvoUnternehmenVector.get(0).getKommentar());
+         kommentarInternFirebird.setText(adiuvoUnternehmenVector.get(0).getKommentarIntern());
+      }
+      
       alleUebernehmen.setAction(new AlleFelderUebernehmen(awcTextFields, unternehmenAdiuvoTextFields, null, null));
       alleLeeren.setAction(new AlleFelderLeeren(unternehmenAdiuvoTextFields, null));
       
@@ -2046,10 +1886,9 @@ public class EditProjektWindow extends JDialog
    
    /**
     * 
-    * Selektiert, wenn vorhanden, den gleichen Studenten aus der Firebird Datenbank.
+    * Selektiert, wenn vorhanden, den gleichen Studenten, Ansprechpartner 
+    * und das gleiche Unternehmen aus der Firebird Datenbank.
     *
-    * @param matrikelnummer     Matrikelnummer des Studenten.
-    * @return   ResultSet mit dem Studenten.
     */
    private void selectDataFromFirebird()
    {
@@ -2106,35 +1945,78 @@ public class EditProjektWindow extends JDialog
          while(rs.next())
          {
             Ansprechpartner ansp = new Ansprechpartner(rs.getInt("id"), rs.getString("titel"), 
-            rs.getString("vorname"), rs.getString("nachname"), rs.getString("position"), rs.getString("abteilung"), 
-            rs.getString("telefon1"), rs.getString("telefon2"), rs.getString("mobil"), rs.getString("fax"), rs.getString("email"),
+            rs.getString("vorname"), rs.getString("nachname"), rs.getString("positionap"), rs.getString("abteilung"), 
+            rs.getString("telefon1"), rs.getString("telefon2"), rs.getString("telefon3"), rs.getString("fax"), rs.getString("email"),
             rs.getString("kommentar"));            
-            adiuvoAnsprechpartner.add(ansp);
+            rs3 = ConnectFirebirdDatabase.getInstance().query("SELECT * FROM organisation WHERE id = " + rs.getInt("organisation"));
+            while(rs3.next())
+            {
+               Unternehmen unternehmen = new Unternehmen(rs3.getInt("id"), rs3.getString("name"), rs3.getString("strasseHausnr"), rs3.getString("plz"), 
+                     rs3.getString("ort"), rs3.getString("telefon"), rs3.getString("email"), rs3.getString("fax"), rs3.getString("internetseite"), 
+                     rs3.getString("branche"), rs3.getString("kommentar"), rs3.getString("kommentarintern"));
+               ansp.setUnternehmen(unternehmen);
+               
+            }
+            adiuvoAnsprechpartnerVector.add(ansp);
+            System.out.println("ansp unt : " + ansp.getUnternehmen().getName());
+         }
+         
+         while(rs2.next())
+         {
             
             Unternehmen unt = new Unternehmen(rs2.getInt("id"), rs2.getString("name"), rs2.getString("strasseHausnr"), rs2.getString("plz"), 
-                  rs2.getString("ort"), rs2.getString("telefon"), rs2.getString("email"), rs3.getString("fax"), rs2.getString("web"), 
+                  rs2.getString("ort"), rs2.getString("telefon"), rs2.getString("email"), rs2.getString("fax"), rs2.getString("internetseite"), 
                   rs2.getString("branche"), rs2.getString("kommentar"), rs2.getString("kommentarintern"));
-            adiuvoUnternehmen.add(unt);
+            adiuvoUnternehmenVector.add(unt);
          }
       }
       catch(SQLException ex)
       {
          ex.printStackTrace();
       }
-      
+
       System.out.println("Student1 : " + adiuvoStudent1.getName() + " " + adiuvoStudent1.getMatrikelnummer());
       System.out.println("Student2 : " + adiuvoStudent2.getName() + " " + adiuvoStudent2.getMatrikelnummer());
-      
+
    }
 
-//   private void setFirebirdStrings()
-//   {
-//      anredetextFirebird = studentanredeFirebird.getText();
-//      vornameFirebird = studentvornameFirebird.getText();
-//      nameFirebird = studentnameFirebird.getText();
-//      matrikelnummerFirebird = studentmatrikelnrFirebird.getText();
-//      emailFirebird = studentemailFirebird.getText();
-//      telefonFirebird = studenttelefonFirebird.getText();
-//   }
-}
+   public void packColumn(JTable table, int margin, TableModel model) 
+   {
+      DefaultTableColumnModel colModel = (DefaultTableColumnModel)table.getColumnModel();
+      TableColumn col;
+      int totallWidth = 0;
+      for(int i = 0; i < model.getColumnCount(); i++)
+      {
+         col = colModel.getColumn(i);
+         int width = 0;
 
+         // Get width of column header
+         TableCellRenderer renderer = col.getHeaderRenderer();
+         if (renderer == null) {
+            renderer = table.getTableHeader().getDefaultRenderer();
+         }
+         Component comp = renderer.getTableCellRendererComponent(
+               table, col.getHeaderValue(), false, false, 0, 0);
+         width = comp.getPreferredSize().width;
+
+         // Get maximum width of column data
+         for (int r=0; r<table.getRowCount(); r++) {
+            renderer = table.getCellRenderer(r, i);
+            comp = renderer.getTableCellRendererComponent(
+                  table, table.getValueAt(r, i), false, false, r, i);
+            width = Math.max(width, comp.getPreferredSize().width);
+         }
+         System.out.println("Maximum width : " + width);
+         
+         // Add margin
+         width += 2*margin;
+         
+         col.setPreferredWidth(width);
+         totallWidth += width;
+      }
+      if(totallWidth > textFieldDimension.width)
+      {
+         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+      }
+   }   
+}

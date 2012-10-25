@@ -1,6 +1,8 @@
 package Windows;
 
 import java.awt.BorderLayout;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.util.Vector;
 
@@ -51,11 +53,13 @@ public class MainWindow extends JFrame
     */
    public void init()
    {
-      setLocation(200, 200);
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       setSize(500, 350);
+      int x = Toolkit.getDefaultToolkit().getScreenSize().width / 2 - this.getWidth() / 2;
+      int y = Toolkit.getDefaultToolkit().getScreenSize().height / 2 - this.getHeight() / 2;
+      Point p = new Point(x, y);
+      setLocation(p);  
       
-//      initProjekttitel();
       ProjekttitelModel tableModel = new ProjekttitelModel(projekttitel);
       JTable projektTable = new JTable(tableModel);
       projektTable.setEnabled(true);
@@ -93,13 +97,5 @@ public class MainWindow extends JFrame
       menuBar.add(datei);
       add(menuBar, BorderLayout.NORTH);
    }
-   
-//   public void initProjekttitel()
-//   {
-//      projekttitel = new Vector<Projektantrag>();
-//      
-//      projekttitel.add("Projekt 1");
-//      projekttitel.add("Projekt 2");
-//   }
-   
+
 }

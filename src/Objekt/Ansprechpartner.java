@@ -185,4 +185,16 @@ public class Ansprechpartner {
    {
       this.unternehmen = unternehmen;
    }
+
+   /**
+    * Getter for property kommentar.
+    * 
+    * @return Returns the kommentar.
+    */
+   public String getKommentar()
+   {
+      return kommentar;
+   }
+   
+   
 }

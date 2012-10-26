@@ -890,28 +890,8 @@ public class EditProjektWindow extends JDialog
       projektskizzeAdiuvo.setLineWrap(true);
       projektskizzeAdiuvo.setWrapStyleWord(true);
       skizzeFirebirdScrollPane = new JScrollPane(projektskizzeAdiuvo);
-      projektartAdiuvo.addFocusListener(new TextAreaFocusListener(skizzeAWCScrollPane, skizzeFirebirdScrollPane, textFieldDimension, textAreaDimension));
-//      projektskizzeAdiuvo.addFocusListener(new FocusListener()
-//      {        
-//         
-//         @Override
-//         public void focusLost(FocusEvent e)
-//         {
-//            skizzeAWCScrollPane.setPreferredSize(textFieldDimension);
-//            skizzeFirebirdScrollPane.setPreferredSize(textFieldDimension);
-//            skizzeAWCScrollPane.updateUI();
-//            skizzeFirebirdScrollPane.updateUI();
-//         }
-//         
-//         @Override
-//         public void focusGained(FocusEvent e)
-//         {
-//            skizzeAWCScrollPane.setPreferredSize(textAreaDimension);
-//            skizzeFirebirdScrollPane.setPreferredSize(textAreaDimension);
-//            skizzeAWCScrollPane.updateUI();
-//            skizzeFirebirdScrollPane.updateUI();
-//         }
-//      });
+      projektskizzeAdiuvo.addFocusListener(new TextAreaFocusListener(skizzeAWCScrollPane, skizzeFirebirdScrollPane, textFieldDimension, textAreaDimension, info2));
+
       skizzeFirebirdScrollPane.setPreferredSize(textFieldDimension);
       skizzeUebernehmen.setAction(new TextAreaUebernehmenButton(projektskizzeAWC, projektskizzeAdiuvo));
       info2.add(skizzeFirebirdScrollPane);    
@@ -940,9 +920,10 @@ public class EditProjektWindow extends JDialog
       projekthintergrundAdiuvo.setLineWrap(true);
       projekthintergrundAdiuvo.setWrapStyleWord(true);
       JScrollPane hintergrundFirebirdScrollPane = new JScrollPane(projekthintergrundAdiuvo);
+      projekthintergrundAdiuvo.addFocusListener(new TextAreaFocusListener(hintergrundAWCScrollPane, hintergrundFirebirdScrollPane, textFieldDimension, textAreaDimension, info3));
+
       hintergrundFirebirdScrollPane.setPreferredSize(textFieldDimension);
       hintergrundUebernehmen.setAction(new TextAreaUebernehmenButton(projekthintergrundAWC, projekthintergrundAdiuvo));
-      projekthintergrundAdiuvo.addFocusListener(new TextAreaFocusListener(hintergrundAWCScrollPane, hintergrundFirebirdScrollPane, textFieldDimension, textAreaDimension));
       info3.add(hintergrundFirebirdScrollPane);    
       tab.add(info3);
 
@@ -971,7 +952,7 @@ public class EditProjektWindow extends JDialog
       JScrollPane beschreibungFirebirdScrollPane = new JScrollPane(projektbeschreibungAdiuvo);
       beschreibungFirebirdScrollPane.setPreferredSize(textFieldDimension);
       beschreibungUebernehmen.setAction(new TextAreaUebernehmenButton(projektbeschreibungAWC, projektbeschreibungAdiuvo));
-      beschreibungFirebirdScrollPane.addFocusListener(new TextAreaFocusListener(beschreibungAWCScrollPane, beschreibungFirebirdScrollPane, textFieldDimension, textAreaDimension));
+      projektbeschreibungAdiuvo.addFocusListener(new TextAreaFocusListener(beschreibungAWCScrollPane, beschreibungFirebirdScrollPane, textFieldDimension, textAreaDimension, info4));
       info4.add(beschreibungFirebirdScrollPane);      
       tab.add(info4);
       

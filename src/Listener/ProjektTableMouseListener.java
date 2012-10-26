@@ -16,7 +16,7 @@ import Windows.EditProjektWindow;
  * @author $Author: Katharina Stein $
  * @version $Revision:  $, $Date: 02.10.2012 $ UTC
  */
-public class TableMouseListener implements MouseListener
+public class ProjektTableMouseListener implements MouseListener
 {
    private JTable source;
    private Vector<Projektantrag> titel;
@@ -28,7 +28,7 @@ public class TableMouseListener implements MouseListener
     * @param source     Tabelle der Projekttiteln.
     * @param titel      Projekttiteln.
     */
-   public TableMouseListener(JTable source, Vector<Projektantrag> titel)
+   public ProjektTableMouseListener(JTable source, Vector<Projektantrag> titel)
    {
       super();
       this.source = source;

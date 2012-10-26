@@ -30,7 +30,10 @@ public class AlleFelderUebernehmen extends AbstractAction
    {
       for(int i = 0; i < felder1.size(); i++)
       {
-         felder2.get(i).setText(felder1.get(i).getText());
+         if(!felder1.get(i).getText().equals(""))
+         {
+            felder2.get(i).setText(felder1.get(i).getText());
+         }
       }
       
       if(textAreas1 != null)

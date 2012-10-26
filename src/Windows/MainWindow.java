@@ -14,7 +14,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
-import Listener.TableMouseListener;
+import Listener.ProjektTableMouseListener;
 import Main.JFrameShower;
 import Objekt.Projektantrag;
 import TableModel.ProjekttitelModel;
@@ -64,7 +64,7 @@ public class MainWindow extends JFrame
       JTable projektTable = new JTable(tableModel);
       projektTable.setEnabled(true);
 
-      projektTable.addMouseListener(new TableMouseListener(projektTable, projekttitel));
+      projektTable.addMouseListener(new ProjektTableMouseListener(projektTable, projekttitel));
       JScrollPane projektScrollPane = new JScrollPane(projektTable);
       add(projektScrollPane, BorderLayout.CENTER);
       

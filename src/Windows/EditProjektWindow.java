@@ -37,6 +37,7 @@ import Actions.AlleFelderUebernehmen;
 import Actions.TextAreaUebernehmenButton;
 import Actions.UebernehmenButton;
 import DatenbankConnector.ConnectFirebirdDatabase;
+import Listener.AnsprechpartnerTableMouseListener;
 import Listener.TabChangeListener;
 import Listener.TextAreaFocusListener;
 import Listener.TextFieldFocusListener;
@@ -89,8 +90,8 @@ public class EditProjektWindow extends JDialog
    private Student adiuvoStudent3;
    private Vector<Ansprechpartner> adiuvoAnsprechpartnerVector = new Vector<Ansprechpartner>();
    private Vector<Unternehmen> adiuvoUnternehmenVector = new Vector<Unternehmen>();
-//   private Ansprechpartner adiuvoAnsprechpartner;
-//   private Unternehmen adiuvoUnternehmen;
+   private Ansprechpartner adiuvoAnsprechpartner;
+   private Unternehmen adiuvoUnternehmen;
    
    
    /**
@@ -1047,16 +1048,16 @@ public class EditProjektWindow extends JDialog
 
 
       // JPanel Auswahl
+      AnsprechpartnerTableModel ansprechpartnerTableModel = new AnsprechpartnerTableModel(adiuvoAnsprechpartnerVector);
+      JTable ansprechpartnerAuswahlTable = new JTable(ansprechpartnerTableModel);
+      ansprechpartnerAuswahlTable.setEnabled(true);
+      
       if(adiuvoAnsprechpartnerVector.size() > 1)
       {
          JPanel ansprechpartnerAuswahl = new JPanel(new FlowLayout());
          JLabel empty3 = new JLabel();
          empty3.setPreferredSize(new Dimension(labelDimension.width + textFieldDimension.width + buttonDimension.width, 10));
          ansprechpartnerAuswahl.add(empty3);
-
-         AnsprechpartnerTableModel ansprechpartnerTableModel = new AnsprechpartnerTableModel(adiuvoAnsprechpartnerVector);
-         JTable ansprechpartnerAuswahlTable = new JTable(ansprechpartnerTableModel);
-         ansprechpartnerAuswahlTable.setEnabled(false);
 
          JScrollPane ansprechpartnerTablePane = new JScrollPane(ansprechpartnerAuswahlTable);
          packColumn(ansprechpartnerAuswahlTable, 1, ansprechpartnerTableModel);
@@ -1429,6 +1430,8 @@ public class EditProjektWindow extends JDialog
       ansprechpartnerAdiuvoTextFields.add(internetseiteFirebird);
       ansprechpartnerAdiuvoTextFields.add(kommentarInternFirebird);
       
+      ansprechpartnerAuswahlTable.addMouseListener(new AnsprechpartnerTableMouseListener(ansprechpartnerAuswahlTable, adiuvoAnsprechpartnerVector, 
+            ansprechpartnerAdiuvoTextFields, adiuvoAnsprechpartner));
       if(adiuvoAnsprechpartnerVector.size() == 1 && adiuvoAnsprechpartnerVector.get(0) != null)
       {
          anredeFirebird.setText("");
@@ -1947,7 +1950,9 @@ public class EditProjektWindow extends JDialog
             Ansprechpartner ansp = new Ansprechpartner(rs.getInt("id"), rs.getString("titel"), 
             rs.getString("vorname"), rs.getString("nachname"), rs.getString("positionap"), rs.getString("abteilung"), 
             rs.getString("telefon1"), rs.getString("telefon2"), rs.getString("telefon3"), rs.getString("fax"), rs.getString("email"),
-            rs.getString("kommentar"));            
+            rs.getString("kommentar"));      
+            ansp.setKommentarIntern(rs.getString("kommentarintern"));
+            ansp.setInternetseite(rs.getString("internetseite"));
             rs3 = ConnectFirebirdDatabase.getInstance().query("SELECT * FROM organisation WHERE id = " + rs.getInt("organisation"));
             while(rs3.next())
             {

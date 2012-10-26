@@ -22,6 +22,8 @@ public class Ansprechpartner {
    private String email;
    private String kommentar;
    private Unternehmen unternehmen;
+   private String kommentarIntern;
+   private String internetseite;
    
    /**
     * 
@@ -164,7 +166,7 @@ public class Ansprechpartner {
     */
    public String getInternetseite()
    {
-      return kommentar;
+      return internetseite;
    }
    /**
     * Getter for property unternehmen.
@@ -195,6 +197,37 @@ public class Ansprechpartner {
    {
       return kommentar;
    }
+
+   /**
+    * Getter for property kommentarIntern.
+    * 
+    * @return Returns the kommentarIntern.
+    */
+   public String getKommentarIntern()
+   {
+      return kommentarIntern;
+   }
+
+   /**
+    * Setter for property kommentarIntern.
+    *
+    * @param kommentarIntern The kommentarIntern to set.
+    */
+   public void setKommentarIntern(String kommentarIntern)
+   {
+      this.kommentarIntern = kommentarIntern;
+   }
+
+   /**
+    * Setter for property internetseite.
+    *
+    * @param internetseite The internetseite to set.
+    */
+   public void setInternetseite(String internetseite)
+   {
+      this.internetseite = internetseite;
+   }
+   
    
    
 }

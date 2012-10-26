@@ -41,6 +41,7 @@ import Listener.AnsprechpartnerTableMouseListener;
 import Listener.TabChangeListener;
 import Listener.TextAreaFocusListener;
 import Listener.TextFieldFocusListener;
+import Listener.UnternehmenTableMouseListener;
 import Objekt.Ansprechpartner;
 import Objekt.Projektantrag;
 import Objekt.Student;
@@ -1490,6 +1491,10 @@ public class EditProjektWindow extends JDialog
       tab.add(ueberschriften);
 
       // JPanel Auswahl
+      UnternehmenTableModel unternehmenTableModel = new UnternehmenTableModel(adiuvoUnternehmenVector);
+      JTable unternehmenAuswahlTable = new JTable(unternehmenTableModel);
+      unternehmenAuswahlTable.setEnabled(true);
+      
       if(adiuvoUnternehmenVector.size() > 1)
       {
          JPanel unternehmenAuswahl = new JPanel(new FlowLayout());
@@ -1497,10 +1502,7 @@ public class EditProjektWindow extends JDialog
          empty3.setPreferredSize(new Dimension(labelDimension.width + textFieldDimension.width + buttonDimension.width, 10));
          unternehmenAuswahl.add(empty3);
 
-         UnternehmenTableModel unternehmenTableModel = new UnternehmenTableModel(adiuvoUnternehmenVector);
-         JTable ansprechpartnerAuswahlTable = new JTable(unternehmenTableModel);
-         ansprechpartnerAuswahlTable.setEnabled(false);
-         JScrollPane ansprechpartnerTablePane = new JScrollPane(ansprechpartnerAuswahlTable);
+         JScrollPane ansprechpartnerTablePane = new JScrollPane(unternehmenAuswahlTable);
          ansprechpartnerTablePane.setPreferredSize(new Dimension(textFieldDimension.width, 80));
          unternehmenAuswahl.add(ansprechpartnerTablePane);
 
@@ -1775,7 +1777,7 @@ public class EditProjektWindow extends JDialog
       telefonAWC.setText(projekt.getAnsprechpartner().getUnternehmen().getTelefon());
       emailAWC.setText(projekt.getAnsprechpartner().getUnternehmen().getEmail());
       faxAWC.setText(projekt.getAnsprechpartner().getUnternehmen().getFax());
-      internetseiteAWC.setText(projekt.getAnsprechpartner().getUnternehmen().getFax());
+      internetseiteAWC.setText(projekt.getAnsprechpartner().getUnternehmen().getInternetseite());
       brancheAWC.setText(projekt.getAnsprechpartner().getUnternehmen().getBranche());
       kommentarAWC.setText(projekt.getAnsprechpartner().getUnternehmen().getKommentar());
       kommentarInternAWC.setText(projekt.getAnsprechpartner().getUnternehmen().getKommentarIntern());
@@ -1819,6 +1821,8 @@ public class EditProjektWindow extends JDialog
          kommentarInternFirebird.setText(adiuvoUnternehmenVector.get(0).getKommentarIntern());
       }
       
+      unternehmenAuswahlTable.addMouseListener(new UnternehmenTableMouseListener(unternehmenAuswahlTable, adiuvoUnternehmenVector, 
+            unternehmenAdiuvoTextFields, adiuvoUnternehmen));
       alleUebernehmen.setAction(new AlleFelderUebernehmen(awcTextFields, unternehmenAdiuvoTextFields, null, null));
       alleLeeren.setAction(new AlleFelderLeeren(unternehmenAdiuvoTextFields, null));
       
@@ -1995,7 +1999,7 @@ public class EditProjektWindow extends JDialog
          col = colModel.getColumn(i);
          int width = 0;
 
-         // Get width of column header
+         // Breite der Spaltenheader
          TableCellRenderer renderer = col.getHeaderRenderer();
          if (renderer == null) {
             renderer = table.getTableHeader().getDefaultRenderer();
@@ -2004,16 +2008,14 @@ public class EditProjektWindow extends JDialog
                table, col.getHeaderValue(), false, false, 0, 0);
          width = comp.getPreferredSize().width;
 
-         // Get maximum width of column data
+         // Maximale Breite der Spalteninhalte
          for (int r=0; r<table.getRowCount(); r++) {
             renderer = table.getCellRenderer(r, i);
             comp = renderer.getTableCellRendererComponent(
                   table, table.getValueAt(r, i), false, false, r, i);
             width = Math.max(width, comp.getPreferredSize().width);
          }
-         System.out.println("Maximum width : " + width);
          
-         // Add margin
          width += 2*margin;
          
          col.setPreferredWidth(width);

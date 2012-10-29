@@ -10,6 +10,7 @@ package Objekt;
 public class Ansprechpartner {
 
    private int id;
+   private String anrede;
    private String titel;
    private String vorname;
    private String name;
@@ -42,10 +43,11 @@ public class Ansprechpartner {
     * @param email
     * @param kommentar
     */
-   public Ansprechpartner(int id, String titel, String vorname, String name, String position, String abteilung, 
+   public Ansprechpartner(int id, String anrede, String titel, String vorname, String name, String position, String abteilung, 
          String telefon1, String telefon2, String mobil, String fax, String email, String kommentar)
    {
       this.id = id;
+      this.anrede = anrede;
       this.titel = titel;
       this.vorname = vorname;
       this.name = name;
@@ -226,6 +228,16 @@ public class Ansprechpartner {
    public void setInternetseite(String internetseite)
    {
       this.internetseite = internetseite;
+   }
+
+   /**
+    * Getter for property anrede.
+    * 
+    * @return Returns the anrede.
+    */
+   public String getAnrede()
+   {
+      return anrede;
    }
    
    

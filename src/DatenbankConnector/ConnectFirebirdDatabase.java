@@ -77,7 +77,7 @@ public class ConnectFirebirdDatabase
       return null;
    }
    
-   public static void update(String q)
+   public void update(String q)
    {
       try
       {
@@ -102,29 +102,6 @@ public class ConnectFirebirdDatabase
       }      
    }
    
-//   public static void commit()
-//   {
-//      try
-//      {
-//         Class.forName("org.firebirdsql.jdbc.FBDriver");
-//      }
-//      catch(ClassNotFoundException e)
-//      {
-//         e.printStackTrace();
-//      }
-//      try
-//      {         
-//         String url = "jdbc:firebirdsql://" + host + ":" + port + "/" + pfad;
-//
-//         con = DriverManager.getConnection(url, benutzername, passwort);
-////         stmt = con.createStatement();
-//         con.commit();
-//      }      
-//      catch(SQLException ex)
-//      {
-//         ex.printStackTrace();
-//      } 
-//   }
 
    /**
     * Setter for property host.

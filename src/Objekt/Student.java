@@ -16,6 +16,9 @@ public class Student {
    private String matrikelnummer;
    private String email;
    private String telefon;
+   private String internetseite;
+   private String kommentar;
+   private String kommentarIntern;
    
    /**
     * 
@@ -103,6 +106,68 @@ public class Student {
    public String getTelefon()
    {
       return telefon;
+   }
+
+   /**
+    * Getter for property internetseite.
+    * 
+    * @return Returns the internetseite.
+    */
+   public String getInternetseite()
+   {
+      return internetseite;
+   }
+
+   /**
+    * Setter for property internetseite.
+    *
+    * @param internetseite The internetseite to set.
+    */
+   public void setInternetseite(String internetseite)
+   {
+      this.internetseite = internetseite;
+   }
+
+   /**
+    * Getter for property kommentar.
+    * 
+    * @return Returns the kommentar.
+    */
+   public String getKommentar()
+   {
+      return kommentar;
+   }
+
+   /**
+    * Setter for property kommentar.
+    *
+    * @param kommentar The kommentar to set.
+    */
+   public void setKommentar(String kommentar)
+   {
+      this.kommentar = kommentar;
+   }
+
+   /**
+    * Getter for property kommentarIntern.
+    * 
+    * @return Returns the kommentarIntern.
+    */
+   public String getKommentarIntern()
+   {
+      return kommentarIntern;
+   }
+
+   /**
+    * Setter for property kommentarIntern.
+    *
+    * @param kommentarIntern The kommentarIntern to set.
+    */
+   public void setKommentarIntern(String kommentarIntern)
+   {
+      this.kommentarIntern = kommentarIntern;
    } 
+   
+   
 
 }

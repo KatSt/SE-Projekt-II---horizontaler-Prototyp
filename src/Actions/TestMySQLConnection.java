@@ -2,12 +2,19 @@ package Actions;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.sql.ResultSet;
 
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import DatenbankConnector.ConnectMySQLDatabase;
 
@@ -83,6 +90,36 @@ public class TestMySQLConnection extends AbstractAction
          ergebnis.setText("Verbindungsaufbau fehlgeschlagen!");
          ergebnis.setForeground(Color.red);
          speichern.setEnabled(false);
+         
+         String pathname = System.getProperty("user.dir");
+         String filename = pathname + "\\Zugangsdaten.xml";
+         File file = new File(filename);
+         try
+         {
+
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(file);   
+            
+            NodeList root = doc.getElementsByTagName("Zugangsdaten");
+            NodeList zugangsdaten = root.item(0).getChildNodes();
+            for(int i = 0; i < zugangsdaten.getLength(); i++)
+            {
+               if(zugangsdaten.item(i).getNodeName().equals("MySQLConnection"))
+               {
+                  Element mysql = (Element) zugangsdaten.item(i);
+                  ConnectMySQLDatabase.getInstance().setHost(mysql.getAttribute("Host"));
+                  ConnectMySQLDatabase.getInstance().setPort(mysql.getAttribute("Port"));
+                  ConnectMySQLDatabase.getInstance().setDatenbankname(mysql.getAttribute("Datenbank"));
+                  ConnectMySQLDatabase.getInstance().setBenutzername(mysql.getAttribute("Benutzername"));
+                  ConnectMySQLDatabase.getInstance().setPasswort(mysql.getAttribute("Passwort"));
+               }      
+            }
+         }
+         catch(Exception ex)
+         {
+            ex.printStackTrace();
+         }
       }
    }
 

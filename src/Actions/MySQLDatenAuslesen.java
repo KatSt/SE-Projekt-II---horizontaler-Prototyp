@@ -140,7 +140,8 @@ public class MySQLDatenAuslesen extends AbstractAction
                rs2 = ConnectMySQLDatabase.getInstance().query("SELECT * FROM ansprechpartner WHERE ansprechpartnerid = " + rs.getInt(8));
                while(rs2.next())
                {
-                  Ansprechpartner ansprechpartner = new Ansprechpartner(rs2.getInt("ansprechpartnerid"), rs2.getString("titel"), 
+                  Integer anrede = rs2.getInt("Anrede");
+                  Ansprechpartner ansprechpartner = new Ansprechpartner(rs2.getInt("ansprechpartnerid"), anrede.toString(), rs2.getString("titel"), 
                         rs2.getString("vorname"), rs2.getString("name"), rs2.getString("position"), rs2.getString("abteilung"), 
                         rs2.getString("telefon1"), rs2.getString("telefon2"), rs2.getString("mobil"), rs2.getString("fax"), rs2.getString("email"),
                         rs2.getString("bemerkung"));

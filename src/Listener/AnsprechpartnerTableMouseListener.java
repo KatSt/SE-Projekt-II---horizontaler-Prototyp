@@ -8,6 +8,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 
 import Objekt.Ansprechpartner;
+import Windows.EditProjektWindow;
 
 /**
  * 
@@ -22,6 +23,7 @@ public class AnsprechpartnerTableMouseListener implements MouseListener
    private Vector<Ansprechpartner> ansp;
    private Ansprechpartner ansprechp;
    private Vector<JTextField> anspTextFields;
+   private EditProjektWindow dialog;
 
    /**
     * 
@@ -32,13 +34,13 @@ public class AnsprechpartnerTableMouseListener implements MouseListener
     * @param anspTextFields     Textefelder die gefüllt werden sollen.
     * @param ansprechpartner    Ansprechpartnerobjekt.
     */
-   public AnsprechpartnerTableMouseListener(JTable source, Vector<Ansprechpartner> ansp, Vector<JTextField> anspTextFields, Ansprechpartner ansprechpartner)
+   public AnsprechpartnerTableMouseListener(JTable source, Vector<Ansprechpartner> ansp, Vector<JTextField> anspTextFields, EditProjektWindow dialog)
    {
       super();
       this.source = source;
       this.ansp = ansp;
-      ansprechp = ansprechpartner;
       this.anspTextFields = anspTextFields;
+      this.dialog = dialog;
    }
 
    /**
@@ -50,11 +52,10 @@ public class AnsprechpartnerTableMouseListener implements MouseListener
    {
       if (e.getClickCount() == 2) 
       {         
-         System.out.println(source.getSelectedRow());
-
          ansprechp = ansp.get(source.getSelectedRow());
+         dialog.setAdiuvoAnsprechpartner(ansprechp);
          
-         anspTextFields.get(0).setText("");
+         anspTextFields.get(0).setText(ansprechp.getAnrede());
          anspTextFields.get(1).setText(ansprechp.getTitel());
          anspTextFields.get(2).setText(ansprechp.getVorname());
          anspTextFields.get(3).setText(ansprechp.getName());
@@ -65,8 +66,8 @@ public class AnsprechpartnerTableMouseListener implements MouseListener
          anspTextFields.get(8).setText(ansprechp.getMobil());
          anspTextFields.get(9).setText(ansprechp.getEmail());
          anspTextFields.get(10).setText(ansprechp.getFax());
-         anspTextFields.get(11).setText(ansprechp.getKommentar());
-         anspTextFields.get(12).setText(ansprechp.getInternetseite());
+         anspTextFields.get(11).setText(ansprechp.getInternetseite());
+         anspTextFields.get(12).setText(ansprechp.getKommentar());
          anspTextFields.get(13).setText(ansprechp.getKommentarIntern());
          
                   

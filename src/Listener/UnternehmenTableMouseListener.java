@@ -8,6 +8,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 
 import Objekt.Unternehmen;
+import Windows.EditProjektWindow;
 
 public class UnternehmenTableMouseListener implements MouseListener
 {
@@ -15,6 +16,7 @@ public class UnternehmenTableMouseListener implements MouseListener
    private Vector<Unternehmen> unt;
    private Unternehmen unternehmen;
    private Vector<JTextField> untTextFields;
+   private EditProjektWindow dialog;
 
    /**
     * 
@@ -25,13 +27,13 @@ public class UnternehmenTableMouseListener implements MouseListener
     * @param untTextFields     Textefelder die gefüllt werden sollen.
     * @param ansprechpartner    Ansprechpartnerobjekt.
     */
-   public UnternehmenTableMouseListener(JTable source, Vector<Unternehmen> unt, Vector<JTextField> untTextFields, Unternehmen unternehmen)
+   public UnternehmenTableMouseListener(JTable source, Vector<Unternehmen> unt, Vector<JTextField> untTextFields, EditProjektWindow dialog)
    {
       super();
       this.source = source;
       this.unt = unt;
-      this.unternehmen = unternehmen;
       this.untTextFields = untTextFields;
+      this.dialog = dialog;
    }
 
    /**
@@ -43,9 +45,9 @@ public class UnternehmenTableMouseListener implements MouseListener
    {
       if (e.getClickCount() == 2) 
       {         
-         System.out.println(source.getSelectedRow());
-
          unternehmen = unt.get(source.getSelectedRow());
+         dialog.setAdiuvoUnternehmen(unternehmen);
+         
          
          untTextFields.get(0).setText(unternehmen.getName());
          untTextFields.get(1).setText(unternehmen.getStraßeHausnr());

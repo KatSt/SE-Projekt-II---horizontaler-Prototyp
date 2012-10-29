@@ -1,11 +1,10 @@
 package Listener;
 import java.awt.Color;
+import java.util.HashMap;
 
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-import Windows.EditProjektWindow;
 
 
 
@@ -18,16 +17,16 @@ import Windows.EditProjektWindow;
  */
 public class TabChangeListener implements ChangeListener
 {   
-   private EditProjektWindow projektWindow;
+   private HashMap<Integer, Boolean> tabs;
    /**
     * 
     * Konstruktor.
     *
     */
-   public TabChangeListener(EditProjektWindow projektWindow)
+   public TabChangeListener(HashMap<Integer, Boolean> tabs)
    {
       super();
-      this.projektWindow = projektWindow;
+      this.tabs = tabs;
    }
    
    /**
@@ -39,29 +38,25 @@ public class TabChangeListener implements ChangeListener
       JTabbedPane pane = (JTabbedPane) e.getSource();
       Color color = new Color(102, 205, 0, 100);
       pane.setBackgroundAt(pane.getSelectedIndex(), color);
-      if(pane.getSelectedIndex() == 0)
-      {
-         projektWindow.setTab1(true);
-      }
       if(pane.getSelectedIndex() == 1)
       {
-         projektWindow.setTab2(true);
+         tabs.put(1, true);
       }
       if(pane.getSelectedIndex() == 2)
       {
-         projektWindow.setTab3(true);
+         tabs.put(2, true);
       }
       if(pane.getSelectedIndex() == 3)
       {
-         projektWindow.setTab4(true);
+         tabs.put(3, true);
       }
       if(pane.getSelectedIndex() == 4)
       {
-         projektWindow.setTab5(true);
+         tabs.put(4, true);
       }
       if(pane.getSelectedIndex() == 5)
       {
-         projektWindow.setTab6(true);
+         tabs.put(5, true);
       }
    }
 

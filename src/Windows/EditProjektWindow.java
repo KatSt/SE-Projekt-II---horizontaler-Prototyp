@@ -3,6 +3,7 @@ package Windows;
 
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -11,6 +12,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -34,6 +36,7 @@ import javax.swing.table.TableModel;
 
 import Actions.AlleFelderLeeren;
 import Actions.AlleFelderUebernehmen;
+import Actions.Archivieren;
 import Actions.TextAreaUebernehmenButton;
 import Actions.UebernehmenButton;
 import DatenbankConnector.ConnectFirebirdDatabase;
@@ -59,13 +62,6 @@ import TableModel.UnternehmenTableModel;
 @SuppressWarnings("serial")
 public class EditProjektWindow extends JDialog
 {
-   boolean tab1 = false;
-   boolean tab2 = false;
-   boolean tab3 = false;
-   boolean tab4 = false;
-   boolean tab5 = false;
-   boolean tab6 = false;
-
    private Projektantrag projekt;
    private Dimension labelDimension = new Dimension(130, 16);
    private Dimension textFieldDimension = new Dimension(300, 30);
@@ -84,8 +80,6 @@ public class EditProjektWindow extends JDialog
    private Vector<JTextField> unternehmenAdiuvoTextFields = new Vector<JTextField>();
    private Vector<JTextField> ansprechpartnerAdiuvoTextFields = new Vector<JTextField>();
    
-   private JScrollPane skizzeFirebirdScrollPane;
-   private JScrollPane skizzeAWCScrollPane;
    private Student adiuvoStudent1;
    private Student adiuvoStudent2;
    private Student adiuvoStudent3;
@@ -93,8 +87,9 @@ public class EditProjektWindow extends JDialog
    private Vector<Unternehmen> adiuvoUnternehmenVector = new Vector<Unternehmen>();
    private Ansprechpartner adiuvoAnsprechpartner;
    private Unternehmen adiuvoUnternehmen;
+   private HashMap<Integer, Boolean> tabs = new HashMap<Integer, Boolean>();
    
-   
+  
    /**
     * 
     * Konstruktor.
@@ -111,6 +106,7 @@ public class EditProjektWindow extends JDialog
       init();
 //      pack();
       setResizable(true);
+
    }
 
    /**
@@ -137,26 +133,34 @@ public class EditProjektWindow extends JDialog
       setLocation(p);  
       
       JTabbedPane tabbedPane = new JTabbedPane();
-      tabbedPane.addChangeListener(new TabChangeListener(this));
 
+      Color color = new Color(102, 205, 0, 100);
+      int index = 0;
       tabbedPane.add("Projekt", initProjektTab());
-      tabbedPane.add("Student 1", initStudentTab1(projekt.getStudent1(), student1AdiuvoAWCTextFields, student1AdiuvoTextFields, adiuvoStudent1));
+      tabbedPane.setBackgroundAt(0, color);
+      tabs.put(index++, true);
+      tabbedPane.add("Student 1", initStudentTab(projekt.getStudent1(), student1AdiuvoAWCTextFields, student1AdiuvoTextFields, adiuvoStudent1));
+      tabs.put(index++, false);
       if(projekt.getStudent2() != null)
       {
-         tabbedPane.add("Student 2", initStudentTab1(projekt.getStudent2(), student2AdiuvoAWCTextFields, student2AdiuvoTextFields, adiuvoStudent2));
+         tabbedPane.add("Student 2", initStudentTab(projekt.getStudent2(), student2AdiuvoAWCTextFields, student2AdiuvoTextFields, adiuvoStudent2));
+         tabs.put(index++, false);
       }
       if(projekt.getStudent3() != null)
       {
-         tabbedPane.add("Student 3", initStudentTab1(projekt.getStudent3(), student3AdiuvoAWCTextFields, student3AdiuvoTextFields, adiuvoStudent3));
+         tabbedPane.add("Student 3", initStudentTab(projekt.getStudent3(), student3AdiuvoAWCTextFields, student3AdiuvoTextFields, adiuvoStudent3));
+         tabs.put(index++, false);
       }
 
       tabbedPane.add("Ansprechpartner", initAnsprechpartnerTab(projekt.getAnsprechpartner()));
+      tabs.put(index++, false);
       tabbedPane.add("Unternehmen", initUnternehmenTab());
+      tabs.put(index, false);
+      tabbedPane.addChangeListener(new TabChangeListener(tabs));
+      
       add(tabbedPane, BorderLayout.CENTER);
 
       add(initSouthButtonBox(), BorderLayout.SOUTH);
-
-
    }
 
    /** 
@@ -169,30 +173,20 @@ public class EditProjektWindow extends JDialog
    {
       Box buttonBox = Box.createHorizontalBox();
 
-      JButton archivieren = new JButton(new AbstractAction("Archivieren")
-      {
-
-         @Override
-         public void actionPerformed(ActionEvent e)
-         {
-            if(tab1 == false || tab2 == false || tab3 == false || tab4 == false || tab5 == false || tab6 == false)
-            {
-//               int returnval = JOptionPane.showConfirmDialog(null, "<html>Es wurden nicht alle Tabs betrachtet. <br /> " +
-//                     "Möchten Sie trotzdem archivieren?", "Info", JOptionPane.INFORMATION_MESSAGE);
-//               if(returnval == JOptionPane.YES_OPTION)
-//               {
-//                  archivieren();
-//               }
-//               JOptionPane.showMessageDialog(null, "Alle Tabs müssen vor dem Archivieren betrachtet werden!", "Info", JOptionPane.INFORMATION_MESSAGE);
-               archivieren();
-            }
-            else
-            {
-               archivieren();
-            }
-
-         }
-      });    
+      JButton archivieren = new JButton(//new AbstractAction("test test test")
+//      {
+//         
+//         @Override
+//         public void actionPerformed(ActionEvent e)
+//         {
+//            for(JTextField field : student2AdiuvoTextFields)
+//            {
+//               System.out.println(field.getText());
+//            }
+//         }
+//      });
+            new Archivieren(tabs, student1AdiuvoTextFields, student2AdiuvoTextFields, student3AdiuvoTextFields, projektAdiuvoTextFields, projektAdiuvoTextAreas,
+            unternehmenAdiuvoTextFields, ansprechpartnerAdiuvoTextFields, adiuvoStudent1, adiuvoStudent2, adiuvoStudent3, getAdiuvoAnsprechpartner(), getAdiuvoUnternehmen(), this));
       buttonBox.add(archivieren);
       buttonBox.add(Box.createHorizontalGlue());
 
@@ -211,152 +205,17 @@ public class EditProjektWindow extends JDialog
 
    }
 
-   public void archivieren()
-   {
-//      if(exists)
-//      {
-//         String update = "UPDATE STUDENT SET ";
-//         int counter = 0;
-//         if(!anredetextFirebird.equals(studentanredeFirebird.getText()))
-//         {
-//            update+= "Anrede = '" + studentanredeFirebird.getText() + "'";
-//            counter++;
-//         }
-//         if(!vornameFirebird.equals(studentvornameFirebird.getText()))
-//         {
-//            if(counter > 0)
-//            {
-//               update+= ", ";
-//            }
-//            update+= "Vorname = '" + studentvornameFirebird.getText() + "'";
-//            counter++;
-//         }
-//         if(!nameFirebird.equals(studentnameFirebird.getText()))
-//         {
-//            if(counter > 0)
-//            {
-//               update+= ", ";
-//            }
-//            update+= "Name = '" + studentnameFirebird.getText() + "'";
-//            counter++;
-//         }
-//         if(!telefonFirebird.equals(studenttelefonFirebird.getText()))
-//         {
-//            if(counter > 0)
-//            {
-//               update+= ", ";
-//            }
-//            update+= "Telefon = '" + studenttelefonFirebird.getText() + "'";     
-//            counter++;
-//         }
-//         if(!emailFirebird.equals(studentemailFirebird.getText()))
-//         {
-//            if(counter > 0)
-//            {
-//               update+= ", ";
-//            }
-//            update += "Email = '" + studentemailFirebird.getText() + "'";
-//            counter++;
-//         }               
-//         if(!matrikelnummerFirebird.equals(studentmatrikelnrFirebird.getText()))
-//         {
-//            if(counter > 0)
-//            {
-//               update+= ", ";
-//            }
-//            update += "Matrikelnummer = '" + studentmatrikelnrFirebird.getText() + "'";
-//            counter++;
-//         }
-//         if(!kommentarAdiuvo.equals(studentkommentarFirebird.getText()))
-//         {
-//            if(counter > 0)
-//            {
-//               update+= ", ";
-//            }
-//            update += "Kommentar = '" + studentkommentarFirebird.getText() + "'";
-//            counter++;
-//         }
-//         if(!kommentarInternFirebird.equals(studentkommentarInternFirebird.getText()))
-//         {
-//            if(counter > 0)
-//            {
-//               update+= ", ";
-//            }
-//            update += "Kommentarintern = '" + studentkommentarInternFirebird.getText() + "'";
-//            counter++;
-//         }
-//         if(!internetseiteFirebird.equals(studentinternetseiteFirebird.getText()))
-//         {
-//            if(counter > 0)
-//            {
-//               update+= ", ";
-//            }
-//            update += "Internetseite = '" + studentinternetseiteFirebird.getText() + "'";
-//            counter++;
-//         }
-//
-//         update += " WHERE matrikelnummer = '" + matrikelnummerFirebird + "';";
-//         System.out.println(update);
-//         if(counter > 0 )
-//         {
-//            ConnectFirebirdDatabase.update(update);
-//         }
-//         dispose();
-//
-//      }
-//      else
-//      {
-//         
-//         String update = "INSERT INTO STUDENT" +             
-//         "(ANREDE, VORNAME, NACHNAME, TELEFON, EMAIL, MATRIKELNUMMER, KOMMENTAR, KOMMENTARINTERN, INTERNETSEITE, ZULETZTGEAENDERT)" 
-//         + "VALUES ( "
-//         + getValue(studentanredeFirebird) + ", "
-//         + getValue(studentvornameFirebird) + ", "
-//         + getValue(studentnameFirebird) + ", "
-//         + getValue(studenttelefonFirebird) + ", "
-//         + getValue(studentemailFirebird) + ", "
-//         + getValue(studentmatrikelnrFirebird) + ", "
-//         + getValue(studentkommentarFirebird) + ", "
-//         + getValue(studentkommentarInternFirebird) + ", "
-//         + getValue(studentinternetseiteFirebird) + ", "
-//         + "'NOW' )";
-//
-//
-//
-//         System.out.println(update);
-//         ConnectFirebirdDatabase.update(update);
-//         exists = true;
-//         setFirebirdStrings();
-//         dispose();
-//      }
-   }
-   
-//   private String getValue(JTextField field)
-//   {
-//      String s = "";
-//      if(field.getText().equals(""))
-//      {
-//         s = "NULL";
-//      }
-//      else
-//      {
-//         s = "'" + field.getText() + "'";
-//      }
-//      
-//      return s;
-//   }
-
    /**
     * 
     * Initialisiert den Tab für die Studenten.
     *
     * @return   JScrollPane mit Studentendaten.
     */
-   private JScrollPane initStudentTab1(Student student, Vector<JTextField> alleFelderAdiuvoAWC, Vector<JTextField> alleFelderAdiuvo, Student adiuvoStudent)
+   private JScrollPane initStudentTab(Student student, Vector<JTextField> alleFelderAdiuvoAWC, Vector<JTextField> alleFelderAdiuvo, Student adiuvoStudent)
    {
       
       Vector<JTextField> alleFelderAWC = new Vector<JTextField>();
-      
+
       Box tab1 = Box.createVerticalBox();
       JScrollPane scrollPanetab1 = new JScrollPane(tab1);
 
@@ -583,10 +442,13 @@ public class EditProjektWindow extends JDialog
       alleFelderAdiuvoAWC.add(studentemailFirebird);
       alleFelderAdiuvoAWC.add(studentmatrikelnrFirebird);
       
-      alleFelderAdiuvo = alleFelderAdiuvoAWC;
+      for(JTextField field : alleFelderAdiuvoAWC)
+      {
+         alleFelderAdiuvo.add(field);
+      }
       alleFelderAdiuvo.add(studentinternetseiteFirebird);
-      alleFelderAdiuvoAWC.add(studentkommentarFirebird);
-      alleFelderAdiuvoAWC.add(studentkommentarInternFirebird);
+      alleFelderAdiuvo.add(studentkommentarFirebird);
+      alleFelderAdiuvo.add(studentkommentarInternFirebird);
       
       studentanredeAWC.setText(student.getAnrede());
       studentnameAWC.setText(student.getName());
@@ -594,13 +456,19 @@ public class EditProjektWindow extends JDialog
       studentmatrikelnrAWC.setText(student.getMatrikelnummer());
       studentemailAWC.setText(student.getEmail());
       studenttelefonAWC.setText(student.getTelefon());
-      
-      studentanredeFirebird.setText(adiuvoStudent.getAnrede());
-      studentnameFirebird.setText(adiuvoStudent.getName());
-      studentvornameFirebird.setText(adiuvoStudent.getVorname());
-      studentmatrikelnrFirebird.setText(adiuvoStudent.getMatrikelnummer());
-      studentemailFirebird.setText(adiuvoStudent.getEmail());
-      studenttelefonFirebird.setText(adiuvoStudent.getTelefon());
+
+      if(adiuvoStudent != null)
+      {
+         studentanredeFirebird.setText(adiuvoStudent.getAnrede());
+         studentnameFirebird.setText(adiuvoStudent.getName());
+         studentvornameFirebird.setText(adiuvoStudent.getVorname());
+         studentmatrikelnrFirebird.setText(adiuvoStudent.getMatrikelnummer());
+         studentemailFirebird.setText(adiuvoStudent.getEmail());
+         studenttelefonFirebird.setText(adiuvoStudent.getTelefon());
+         studentkommentarFirebird.setText(adiuvoStudent.getKommentar());
+         studentkommentarInternFirebird.setText(adiuvoStudent.getKommentarIntern());
+         studentinternetseiteFirebird.setText(adiuvoStudent.getInternetseite());
+      }
 
       // Buttons
       JPanel buttonPanel = new JPanel(new FlowLayout());
@@ -877,7 +745,7 @@ public class EditProjektWindow extends JDialog
       projektskizzeAWC.setEditable(false);
       projektskizzeAWC.setLineWrap(true);
       projektskizzeAWC.setWrapStyleWord(true);     
-      skizzeAWCScrollPane = new JScrollPane(projektskizzeAWC);
+      JScrollPane skizzeAWCScrollPane = new JScrollPane(projektskizzeAWC);
       skizzeAWCScrollPane.setPreferredSize(textFieldDimension);
       info2.add(skizzeAWCScrollPane);
 
@@ -889,7 +757,7 @@ public class EditProjektWindow extends JDialog
       JTextArea projektskizzeAdiuvo = new JTextArea();
       projektskizzeAdiuvo.setLineWrap(true);
       projektskizzeAdiuvo.setWrapStyleWord(true);
-      skizzeFirebirdScrollPane = new JScrollPane(projektskizzeAdiuvo);
+      JScrollPane skizzeFirebirdScrollPane = new JScrollPane(projektskizzeAdiuvo);
       projektskizzeAdiuvo.addFocusListener(new TextAreaFocusListener(skizzeAWCScrollPane, skizzeFirebirdScrollPane, textFieldDimension, textAreaDimension, info2));
 
       skizzeFirebirdScrollPane.setPreferredSize(textFieldDimension);
@@ -980,7 +848,10 @@ public class EditProjektWindow extends JDialog
       projektAdiuvoTextAreas.add(projektbeschreibungAdiuvo);
       projektAdiuvoTextAreas.add(projekthintergrundAdiuvo);
       
-      projektAdiuvoTextFields = projektAdiuvoAWCTextFields;
+      for(JTextField field : projektAdiuvoAWCTextFields)
+      {
+         projektAdiuvoTextFields.add(field);
+      }
       projektAdiuvoTextFields.add(projektartAdiuvo);
       projektAdiuvoTextFields.add(endeAdiuvo);
       projektAdiuvoTextFields.add(kolloquiumAdiuvo);
@@ -1042,7 +913,7 @@ public class EditProjektWindow extends JDialog
          ansprechpartnerAuswahl.add(empty3);
 
          JScrollPane ansprechpartnerTablePane = new JScrollPane(ansprechpartnerAuswahlTable);
-         packColumn(ansprechpartnerAuswahlTable, 1, ansprechpartnerTableModel);
+         packColumn(ansprechpartnerAuswahlTable, ansprechpartnerTableModel);
          ansprechpartnerTablePane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
          ansprechpartnerTablePane.setPreferredSize(new Dimension(textFieldDimension.width, 80));
          ansprechpartnerAuswahl.add(ansprechpartnerTablePane);
@@ -1370,6 +1241,7 @@ public class EditProjektWindow extends JDialog
       kommentarInternFirebird.setPreferredSize(textFieldDimension);
       info14.add(kommentarInternFirebird);
       
+      anredeAWC.setText(ansprechpartner.getAnrede());
       titelAWC.setText(ansprechpartner.getTitel());
       vornameAWC.setText(ansprechpartner.getVorname());
       nameAWC.setText(ansprechpartner.getName());
@@ -1408,12 +1280,15 @@ public class EditProjektWindow extends JDialog
       alleAdiuvoFelder.add(faxFirebird);
       alleAdiuvoFelder.add(kommentarFirebird);
       
-      ansprechpartnerAdiuvoTextFields = alleAdiuvoFelder;
+      for(JTextField field : alleAdiuvoFelder)
+      {
+         ansprechpartnerAdiuvoTextFields.add(field);
+      }
       ansprechpartnerAdiuvoTextFields.add(internetseiteFirebird);
       ansprechpartnerAdiuvoTextFields.add(kommentarInternFirebird);
       
       ansprechpartnerAuswahlTable.addMouseListener(new AnsprechpartnerTableMouseListener(ansprechpartnerAuswahlTable, adiuvoAnsprechpartnerVector, 
-            ansprechpartnerAdiuvoTextFields, adiuvoAnsprechpartner));
+            ansprechpartnerAdiuvoTextFields, this));
       if(adiuvoAnsprechpartnerVector.size() == 1 && adiuvoAnsprechpartnerVector.get(0) != null)
       {
          anredeFirebird.setText("");
@@ -1484,6 +1359,7 @@ public class EditProjektWindow extends JDialog
          unternehmenAuswahl.add(empty3);
 
          JScrollPane ansprechpartnerTablePane = new JScrollPane(unternehmenAuswahlTable);
+         packColumn(unternehmenAuswahlTable, unternehmenTableModel);
          ansprechpartnerTablePane.setPreferredSize(new Dimension(textFieldDimension.width, 80));
          unternehmenAuswahl.add(ansprechpartnerTablePane);
 
@@ -1803,7 +1679,7 @@ public class EditProjektWindow extends JDialog
       }
       
       unternehmenAuswahlTable.addMouseListener(new UnternehmenTableMouseListener(unternehmenAuswahlTable, adiuvoUnternehmenVector, 
-            unternehmenAdiuvoTextFields, adiuvoUnternehmen));
+            unternehmenAdiuvoTextFields, this));
       alleUebernehmen.setAction(new AlleFelderUebernehmen(awcTextFields, unternehmenAdiuvoTextFields, null, null));
       alleLeeren.setAction(new AlleFelderLeeren(unternehmenAdiuvoTextFields, null));
       
@@ -1811,66 +1687,6 @@ public class EditProjektWindow extends JDialog
       return scrollPanetab;
    }
 
-   
-   /**
-    * Setter for property tab1.
-    *
-    * @param tab1 The tab1 to set.
-    */
-   public void setTab1(boolean tab1)
-   {
-      this.tab1 = tab1;
-   }
-
-   /**
-    * Setter for property tab2.
-    *
-    * @param tab2 The tab2 to set.
-    */
-   public void setTab2(boolean tab2)
-   {
-      this.tab2 = tab2;
-   }
-
-   /**
-    * Setter for property tab3.
-    *
-    * @param tab3 The tab3 to set.
-    */
-   public void setTab3(boolean tab3)
-   {
-      this.tab3 = tab3;
-   }
-
-   /**
-    * Setter for property tab4.
-    *
-    * @param tab4 The tab4 to set.
-    */
-   public void setTab4(boolean tab4)
-   {
-      this.tab4 = tab4;
-   }
-
-   /**
-    * Setter for property tab5.
-    *
-    * @param tab5 The tab5 to set.
-    */
-   public void setTab5(boolean tab5)
-   {
-      this.tab5 = tab5;
-   }
-
-   /**
-    * Setter for property tab6.
-    *
-    * @param tab6 The tab6 to set.
-    */
-   public void setTab6(boolean tab6)
-   {
-      this.tab6 = tab6;
-   }
    
    /**
     * 
@@ -1901,13 +1717,19 @@ public class EditProjektWindow extends JDialog
          {
             adiuvoStudent1 = new Student(rs.getInt("id"), rs.getString("anrede"), rs.getString("vorname"), rs.getString("nachname"), 
                   rs.getString("matrikelnummer"), rs.getString("email"), rs.getString("telefon"));
+            adiuvoStudent1.setInternetseite(rs.getString("internetseite"));
+            adiuvoStudent1.setKommentar(rs.getString("kommentar"));
+            adiuvoStudent1.setKommentarIntern(rs.getString("kommentarintern"));
          }
          if(rs2 != null)
          {
             while(rs2.next())
             {
                adiuvoStudent2 = new Student(rs2.getInt("id"), rs2.getString("anrede"), rs2.getString("vorname"), rs2.getString("nachname"), 
-                     rs2.getString("matrikelnummer"), rs2.getString("email"), rs2.getString("telefon")); 
+                     rs2.getString("matrikelnummer"), rs2.getString("email"), rs2.getString("telefon"));
+               adiuvoStudent2.setInternetseite(rs2.getString("internetseite"));
+               adiuvoStudent2.setKommentar(rs2.getString("kommentar"));
+               adiuvoStudent2.setKommentarIntern(rs2.getString("kommentarintern"));
             }
          }
          if(rs3 != null)
@@ -1916,6 +1738,9 @@ public class EditProjektWindow extends JDialog
             {
                adiuvoStudent3 = new Student(rs3.getInt("id"), rs3.getString("anrede"), rs3.getString("vorname"), rs3.getString("nachname"), 
                      rs3.getString("matrikelnummer"), rs3.getString("email"), rs3.getString("telefon")); 
+               adiuvoStudent3.setInternetseite(rs3.getString("internetseite"));
+               adiuvoStudent3.setKommentar(rs3.getString("kommentar"));
+               adiuvoStudent3.setKommentarIntern(rs3.getString("kommentarintern"));
             }
          }
       }
@@ -1932,7 +1757,7 @@ public class EditProjektWindow extends JDialog
       {
          while(rs.next())
          {
-            Ansprechpartner ansp = new Ansprechpartner(rs.getInt("id"), rs.getString("titel"), 
+            Ansprechpartner ansp = new Ansprechpartner(rs.getInt("id"), rs.getString("anrede"), rs.getString("titel"), 
             rs.getString("vorname"), rs.getString("nachname"), rs.getString("positionap"), rs.getString("abteilung"), 
             rs.getString("telefon1"), rs.getString("telefon2"), rs.getString("telefon3"), rs.getString("fax"), rs.getString("email"),
             rs.getString("kommentar"));      
@@ -1948,7 +1773,6 @@ public class EditProjektWindow extends JDialog
                
             }
             adiuvoAnsprechpartnerVector.add(ansp);
-            System.out.println("ansp unt : " + ansp.getUnternehmen().getName());
          }
          
          while(rs2.next())
@@ -1965,16 +1789,22 @@ public class EditProjektWindow extends JDialog
          ex.printStackTrace();
       }
 
-      System.out.println("Student1 : " + adiuvoStudent1.getName() + " " + adiuvoStudent1.getMatrikelnummer());
-      System.out.println("Student2 : " + adiuvoStudent2.getName() + " " + adiuvoStudent2.getMatrikelnummer());
-
    }
 
-   public void packColumn(JTable table, int margin, TableModel model) 
+   /**
+    * 
+    * Spaltenbreite der Ansprechpartner- und Unternehmensauswahltabelle
+    * anpassen.
+    *
+    * @param table      Ansprechpartner- oder Unternehmenstabelle
+    * @param model      Tabellenmodel
+    */
+   public void packColumn(JTable table, TableModel model) 
    {
       DefaultTableColumnModel colModel = (DefaultTableColumnModel)table.getColumnModel();
       TableColumn col;
       int totallWidth = 0;
+      int margin = 2;
       for(int i = 0; i < model.getColumnCount(); i++)
       {
          col = colModel.getColumn(i);
@@ -2006,5 +1836,75 @@ public class EditProjektWindow extends JDialog
       {
          table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
       }
+   }
+
+   /**
+    * Getter for property student1AdiuvoTextFields.
+    * 
+    * @return Returns the student1AdiuvoTextFields.
+    */
+   public Vector<JTextField> getStudent1AdiuvoTextFields()
+   {
+      return student1AdiuvoTextFields;
+   }
+
+   /**
+    * Getter for property student2AdiuvoTextFields.
+    * 
+    * @return Returns the student2AdiuvoTextFields.
+    */
+   public Vector<JTextField> getStudent2AdiuvoTextFields()
+   {
+      return student2AdiuvoTextFields;
+   }
+
+   /**
+    * Getter for property student3AdiuvoTextFields.
+    * 
+    * @return Returns the student3AdiuvoTextFields.
+    */
+   public Vector<JTextField> getStudent3AdiuvoTextFields()
+   {
+      return student3AdiuvoTextFields;
+   }
+
+   /**
+    * Getter for property adiuvoAnsprechpartner.
+    * 
+    * @return Returns the adiuvoAnsprechpartner.
+    */
+   public Ansprechpartner getAdiuvoAnsprechpartner()
+   {
+      return adiuvoAnsprechpartner;
+   }
+
+   /**
+    * Getter for property adiuvoUnternehmen.
+    * 
+    * @return Returns the adiuvoUnternehmen.
+    */
+   public Unternehmen getAdiuvoUnternehmen()
+   {
+      return adiuvoUnternehmen;
+   }
+
+   /**
+    * Setter for property adiuvoAnsprechpartner.
+    *
+    * @param adiuvoAnsprechpartner The adiuvoAnsprechpartner to set.
+    */
+   public void setAdiuvoAnsprechpartner(Ansprechpartner adiuvoAnsprechpartner)
+   {
+      this.adiuvoAnsprechpartner = adiuvoAnsprechpartner;
+   }
+
+   /**
+    * Setter for property adiuvoUnternehmen.
+    *
+    * @param adiuvoUnternehmen The adiuvoUnternehmen to set.
+    */
+   public void setAdiuvoUnternehmen(Unternehmen adiuvoUnternehmen)
+   {
+      this.adiuvoUnternehmen = adiuvoUnternehmen;
    }   
 }

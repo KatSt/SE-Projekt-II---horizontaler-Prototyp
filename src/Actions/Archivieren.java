@@ -12,6 +12,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import DatenbankConnector.ConnectFirebirdDatabase;
+import Main.ReturnVal;
 import Objekt.Ansprechpartner;
 import Objekt.Student;
 import Objekt.Unternehmen;
@@ -46,6 +47,12 @@ public class Archivieren extends AbstractAction
    private int student3ID;
    private int ansprechpartnerID;
    private int unternehmensID;
+   private Boolean commitStud1 = new Boolean(true);
+   private Boolean commitStud2 = new Boolean(true);
+   private Boolean commitStud3 = new Boolean(true);
+   private Boolean commitUnt = new Boolean(true);
+   private Boolean commitAnt = new Boolean(true);
+   private Boolean commitProj = new Boolean(true);
 
    /**
     * 
@@ -111,27 +118,37 @@ public class Archivieren extends AbstractAction
 
       if(execute)
       {
-         if(adiuvoAnsprechpartner == null)
-         {
-            System.out.println("Ansprechpartner = null");
-         }
-         if(adiuvoUnternehmen == null)
-         {
-            System.out.println("Unternehmen = null");
-         }
-         student1ID= studentArchivieren(adiuvoStudent1, student1AdiuvoTextFields);
+         ConnectFirebirdDatabase.getInstance().openDatabaseConnection();
+
+         ReturnVal rv1 = studentArchivieren(adiuvoStudent1, student1AdiuvoTextFields);
+         student1ID = rv1.getId();
+         commitStud1 = rv1.isCommit();
          if(student2AdiuvoTextFields.size() > 0 )
          {
-            student2ID = studentArchivieren(adiuvoStudent2, student2AdiuvoTextFields);
+             ReturnVal rv2 = studentArchivieren(adiuvoStudent2, student2AdiuvoTextFields);
+             student2ID = rv2.getId();
+             commitStud2 = rv2.isCommit();
          }
          if(student3AdiuvoTextFields.size() > 0)
          {
-            student3ID = studentArchivieren(adiuvoStudent3, student3AdiuvoTextFields);
+             ReturnVal rv3 = studentArchivieren(adiuvoStudent3, student3AdiuvoTextFields);
+             student3ID = rv3.getId();
+             commitStud3 = rv3.isCommit();
          }
          unternehmenArchivieren(); 
          ansprechpartnerArchivieren();
          System.out.println("uID : " + unternehmensID + "  aID : " + ansprechpartnerID + " s1 : " + student1ID + "  s2 : " + student2ID + "  s3 : " + student3ID);
          projektArchivieren(); 
+         System.out.println("uID : " + commitUnt + "  aID : " + commitAnt + " s1 : " + commitStud1 + "  s2 : " + commitStud2 + "  s3 : " + commitStud3 + " p : " + commitProj);
+         if(commitUnt == false || commitAnt == false || commitStud1 == false || commitStud2 == false || commitStud3 == false || commitProj == false)
+         {
+            ConnectFirebirdDatabase.getInstance().commit(false);
+         }
+         else
+         {
+            ConnectFirebirdDatabase.getInstance().commit(true);
+         }
+         ConnectFirebirdDatabase.getInstance().closeConnection();
 
          dialog.dispose();
       }
@@ -182,7 +199,12 @@ public class Archivieren extends AbstractAction
       update += "'NOW');";
 
       System.out.println(update);
-      ConnectFirebirdDatabase.getInstance().update(update);
+      ResultSet rs = ConnectFirebirdDatabase.getInstance().insert(update);
+      
+      if(rs == null)
+      {
+         commitProj = false;
+      }
 
    }
 
@@ -194,9 +216,10 @@ public class Archivieren extends AbstractAction
     * @param student        Studentobjekt aus der Firebird Datenbank
     * @param textFields     Vom Nutzer aktualisierte Werte
     */
-   private int studentArchivieren(Student student, Vector<JTextField> textFields)
+   private ReturnVal studentArchivieren(Student student, Vector<JTextField> textFields)
    {
       String update = "";
+      Boolean commit = true;
       int id = -1;
       if(student == null)
       {
@@ -225,6 +248,7 @@ public class Archivieren extends AbstractAction
          }
          catch(SQLException ex)
          {
+            commit = false;
             ex.printStackTrace();
          }         
 
@@ -311,12 +335,12 @@ public class Archivieren extends AbstractAction
          {
             System.out.println(update);
 
-            ConnectFirebirdDatabase.getInstance().update(update);
+            commit = ConnectFirebirdDatabase.getInstance().update(update);
          }
          id = student.getId();
       }
-      System.out.println(id);
-      return id;
+      ReturnVal rv = new ReturnVal(id, commit);
+      return rv;
    }
    
    /**
@@ -351,18 +375,9 @@ public class Archivieren extends AbstractAction
          + "'NOW' );";
          
          ResultSet rs = ConnectFirebirdDatabase.getInstance().insert(update);
-//         System.out.println("result : " + result);
-//         ResultSet rs = ConnectFirebirdDatabase.getInstance().query("SELECT id FROM ansprechpartner WHERE vorname = "
-//               + getTextFieldValue(ansprechpartnerAdiuvoTextFields.get(2)) + " AND nachname = " + getTextFieldValue(ansprechpartnerAdiuvoTextFields.get(3)) + 
-//               " AND TELEFON1 = " + getTextFieldValue(ansprechpartnerAdiuvoTextFields.get(4)) + " AND email = " + getTextFieldValue(ansprechpartnerAdiuvoTextFields.get(9)) + ";");
-         System.out.println("Aber ich mache hier überhaupt was? " + update);
 
          try
          {
-            if(rs == null)
-            {
-               System.out.println("funktioniert nich!");
-            }
             while(rs.next())
             {
                ansprechpartnerID = rs.getInt(1);
@@ -371,6 +386,7 @@ public class Archivieren extends AbstractAction
          }
          catch(SQLException ex)
          {
+            commitAnt = false;
             ex.printStackTrace();
          }         
       }
@@ -519,11 +535,10 @@ public class Archivieren extends AbstractAction
          {
             System.out.println(update);
 
-            ConnectFirebirdDatabase.getInstance().update(update);
+            commitAnt = ConnectFirebirdDatabase.getInstance().update(update);
          }
          ansprechpartnerID = adiuvoAnsprechpartner.getId();
       }
-      System.out.println("hallo? : " +ansprechpartnerID);
    }
 
    /**
@@ -565,6 +580,7 @@ public class Archivieren extends AbstractAction
          }
          catch(SQLException ex)
          {
+            commitUnt = false;
             ex.printStackTrace();
          }         
       }
@@ -677,11 +693,10 @@ public class Archivieren extends AbstractAction
          {
             System.out.println(update);
 
-            ConnectFirebirdDatabase.getInstance().update(update);
+            commitUnt = ConnectFirebirdDatabase.getInstance().update(update);
          }
          unternehmensID = adiuvoUnternehmen.getId();
       }
-      System.out.println(unternehmensID);
    }
 
    /**

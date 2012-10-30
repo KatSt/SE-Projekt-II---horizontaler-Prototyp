@@ -88,6 +88,7 @@ public class EditProjektWindow extends JDialog
    private Ansprechpartner adiuvoAnsprechpartner;
    private Unternehmen adiuvoUnternehmen;
    private HashMap<Integer, Boolean> tabs = new HashMap<Integer, Boolean>();
+
    
   
    /**
@@ -1696,6 +1697,7 @@ public class EditProjektWindow extends JDialog
     */
    private void selectDataFromFirebird()
    {
+      ConnectFirebirdDatabase.getInstance().openDatabaseConnection();
       ResultSet rs = ConnectFirebirdDatabase.getInstance().query("SELECT * FROM student WHERE matrikelnummer = '" + 
             projekt.getStudent1().getMatrikelnummer() + "'");
       
@@ -1783,11 +1785,13 @@ public class EditProjektWindow extends JDialog
                   rs2.getString("branche"), rs2.getString("kommentar"), rs2.getString("kommentarintern"));
             adiuvoUnternehmenVector.add(unt);
          }
+         ConnectFirebirdDatabase.getInstance().closeConnection();
       }
       catch(SQLException ex)
       {
          ex.printStackTrace();
       }
+      
 
    }
 

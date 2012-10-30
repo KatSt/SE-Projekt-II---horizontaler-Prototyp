@@ -35,34 +35,35 @@ public class ConnectFirebirdDatabase
       {
          e.printStackTrace();
       }
+
    }
 
    public synchronized static ConnectFirebirdDatabase getInstance()
    {
       if (connectFirebirdDatabase == null) 
       {
-          connectFirebirdDatabase = new ConnectFirebirdDatabase();
+         connectFirebirdDatabase = new ConnectFirebirdDatabase();
       }
       return connectFirebirdDatabase;
    }
    
    public  ResultSet query(String q)
    {
-      try
-      {
-         Class.forName("org.firebirdsql.jdbc.FBDriver");
-      }
-      catch(ClassNotFoundException e)
-      {
-         e.printStackTrace();
-      }
+//      try
+//      {
+//         Class.forName("org.firebirdsql.jdbc.FBDriver");
+//      }
+//      catch(ClassNotFoundException e)
+//      {
+//         e.printStackTrace();
+//      }
 
       try
       {
          ResultSet rs;
-         String url = "jdbc:firebirdsql://" + host + ":" + port + "/" + pfad;
-
-         con = DriverManager.getConnection(url, benutzername, passwort);
+//         String url = "jdbc:firebirdsql://" + host + ":" + port + "/" + pfad;
+//
+//         con = DriverManager.getConnection(url, benutzername, passwort);
          stmt = con.createStatement();
          rs = stmt.executeQuery(q);
          
@@ -77,49 +78,40 @@ public class ConnectFirebirdDatabase
       return null;
    }
    
-   public void update(String q)
+   /**
+    * 
+    * Führt ein Update bei einem bereits vorhandenen Datensatz in der Datenbank durch.
+    *
+    * @param q  Updatebefehl.
+    */
+   public Boolean update(String q)
    {
       try
-      {
-         Class.forName("org.firebirdsql.jdbc.FBDriver");
-      }
-      catch(ClassNotFoundException e)
-      {
-         e.printStackTrace();
-      }
-      
-      try
       {  
-         String url = "jdbc:firebirdsql://" + host + ":" + port + "/" + pfad;
-
-         con = DriverManager.getConnection(url, benutzername, passwort);
          stmt = con.createStatement();
          stmt.executeUpdate(q);
-
+         return true;
       }      
       catch(SQLException ex)
       {
          ex.printStackTrace();
+         return false;
       }            
    }
    
+   /**
+    * 
+    * Fügt der Datenbank einen neuen Datensatz hinzu.
+    *
+    * @param q  Insertbefehl
+    * @return   PrimaryKey des Datensatzes.
+    */
    public ResultSet insert(String q)
-   {
-      try
-      {
-         Class.forName("org.firebirdsql.jdbc.FBDriver");
-      }
-      catch(ClassNotFoundException e)
-      {
-         e.printStackTrace();
-      }
-      
+   {      
       try
       {  
          ResultSet generatedKeys;
-         String url = "jdbc:firebirdsql://" + host + ":" + port + "/" + pfad;
 
-         con = DriverManager.getConnection(url, benutzername, passwort);
          stmt = con.createStatement();
          stmt.executeUpdate(q, Statement.RETURN_GENERATED_KEYS );
 
@@ -132,6 +124,77 @@ public class ConnectFirebirdDatabase
          ex.printStackTrace();
          return null;
       }            
+   }
+   
+   /**
+    * 
+    * Initialisiert die Verbindung zur Datenbank.
+    *
+    */
+   public void openDatabaseConnection()
+   {
+      try
+      {
+         Class.forName("org.firebirdsql.jdbc.FBDriver");
+      }
+      catch(ClassNotFoundException e)
+      {
+         e.printStackTrace();
+      }
+      
+      try
+      {  
+         String url = "jdbc:firebirdsql://" + host + ":" + port + "/" + pfad;
+
+         con = DriverManager.getConnection(url, benutzername, passwort);
+         con.setAutoCommit(false);      
+      }      
+      catch(SQLException ex)
+      {
+         ex.printStackTrace();
+      } 
+   }
+   
+   /**
+    * 
+    * Schileßt eine geöffnete Datenbankverbindung.
+    *
+    */
+   public void closeConnection()
+   {
+      try
+      {
+         con.close();
+      }
+      catch(SQLException e)
+      {
+         e.printStackTrace();
+      }
+   }
+   /**
+    * 
+    * Führt einen commit oder einen rollback durch.
+    *
+    * @param commit 
+    */
+   public void commit(boolean commit)
+   {     
+      try
+      {  
+         if(commit)
+         {
+            con.commit();
+         }
+         else
+         {
+            con.rollback();
+         }
+      }      
+      catch(SQLException ex)
+      {
+         ex.printStackTrace();
+      }            
+      
    }
    
 

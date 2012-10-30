@@ -17,6 +17,13 @@ import Objekt.Student;
 import Objekt.Unternehmen;
 import Windows.EditProjektWindow;
 
+/**
+ * 
+ * AbstractAction zur Archivierung der Daten in die Firebird-Datenbank.
+ *
+ * @author $Author: Katharina Stein $
+ * @version $Revision:  $, $Date: 30.10.2012 $ UTC
+ */
 @SuppressWarnings("serial")
 public class Archivieren extends AbstractAction
 {
@@ -40,6 +47,25 @@ public class Archivieren extends AbstractAction
    private int ansprechpartnerID;
    private int unternehmensID;
 
+   /**
+    * 
+    * Übernimmt die benötigten Parameter.
+    *
+    * @param tabs
+    * @param student1AdiuvoTextFields
+    * @param student2AdiuvoTextFields
+    * @param student3AdiuvoTextFields
+    * @param projektAdiuvoTextFields
+    * @param projektAdiuvoTextAreas
+    * @param unternehmenAdiuvoTextFields
+    * @param ansprechpartnerAdiuvoTextFields
+    * @param adiuvoStudent1
+    * @param adiuvoStudent2
+    * @param adiuvoStudent3
+    * @param adiuvoAnsprechpartner
+    * @param adiuvoUnternehmen
+    * @param dialog
+    */
    public Archivieren(HashMap<Integer, Boolean> tabs, Vector<JTextField> student1AdiuvoTextFields, Vector<JTextField> student2AdiuvoTextFields,
          Vector<JTextField> student3AdiuvoTextFields, Vector<JTextField> projektAdiuvoTextFields, Vector<JTextArea> projektAdiuvoTextAreas, Vector<JTextField> unternehmenAdiuvoTextFields, 
          Vector<JTextField> ansprechpartnerAdiuvoTextFields, Student adiuvoStudent1, Student adiuvoStudent2, Student adiuvoStudent3, Ansprechpartner adiuvoAnsprechpartner,
@@ -64,6 +90,9 @@ public class Archivieren extends AbstractAction
       
    }
 
+   /**
+    * Führt die Archivierung durch und schließt das Fenster.
+    */
    @Override
    public void actionPerformed(ActionEvent e)
    {
@@ -134,7 +163,7 @@ public class Archivieren extends AbstractAction
       + getTextFieldValue(projektAdiuvoTextFields.get(8)) + ", "
       + ansprechpartnerID + ", "
       +  student1ID + ", ";
-      if(adiuvoStudent2 != null)
+      if(student2AdiuvoTextFields.size() > 0 )
       {
          update += student2ID + ", ";
       }
@@ -142,7 +171,7 @@ public class Archivieren extends AbstractAction
       {
          update += "NULL, ";
       }
-      if(adiuvoStudent3 != null)
+      if(student3AdiuvoTextFields.size() > 0 )
       {
          update += student3ID + ", ";
       }
@@ -185,19 +214,19 @@ public class Archivieren extends AbstractAction
          + getTextFieldValue(textFields.get(8)) + ", "
          + "'NOW' );";
 
-         ConnectFirebirdDatabase.getInstance().update(update);
-         ResultSet rs = ConnectFirebirdDatabase.getInstance().query("SELECT id FROM student WHERE matrikelnummer = " + textFields.get(5));
+         ResultSet rs = ConnectFirebirdDatabase.getInstance().insert(update);
          try
          {
             while(rs.next())
             {
-               id = rs.getInt("id");
+               id = rs.getInt(1);
+               System.out.println("studID : " + id);
             }
          }
          catch(SQLException ex)
          {
             ex.printStackTrace();
-         }
+         }         
 
       }
       else
@@ -289,6 +318,12 @@ public class Archivieren extends AbstractAction
       System.out.println(id);
       return id;
    }
+   
+   /**
+    * 
+    * Archiviert oder updatet einen Ansprechparnter in der Firebird-Datenbank.
+    *
+    */
    private void ansprechpartnerArchivieren()
    {
       String update = "";
@@ -315,15 +350,23 @@ public class Archivieren extends AbstractAction
          + unternehmensID + ", "
          + "'NOW' );";
          
-         ConnectFirebirdDatabase.getInstance().update(update);
-         ResultSet rs = ConnectFirebirdDatabase.getInstance().query("SELECT id FROM ansprechpartner WHERE vorname = "
-               + getTextFieldValue(ansprechpartnerAdiuvoTextFields.get(2)) + " AND nachname = " + getTextFieldValue(ansprechpartnerAdiuvoTextFields.get(3)) + 
-               " AND TELEFON1 = " + getTextFieldValue(ansprechpartnerAdiuvoTextFields.get(4)) + " AND email = " + getTextFieldValue(ansprechpartnerAdiuvoTextFields.get(9)) + ";");
+         ResultSet rs = ConnectFirebirdDatabase.getInstance().insert(update);
+//         System.out.println("result : " + result);
+//         ResultSet rs = ConnectFirebirdDatabase.getInstance().query("SELECT id FROM ansprechpartner WHERE vorname = "
+//               + getTextFieldValue(ansprechpartnerAdiuvoTextFields.get(2)) + " AND nachname = " + getTextFieldValue(ansprechpartnerAdiuvoTextFields.get(3)) + 
+//               " AND TELEFON1 = " + getTextFieldValue(ansprechpartnerAdiuvoTextFields.get(4)) + " AND email = " + getTextFieldValue(ansprechpartnerAdiuvoTextFields.get(9)) + ";");
+         System.out.println("Aber ich mache hier überhaupt was? " + update);
+
          try
          {
+            if(rs == null)
+            {
+               System.out.println("funktioniert nich!");
+            }
             while(rs.next())
             {
-               ansprechpartnerID = rs.getInt("id");
+               ansprechpartnerID = rs.getInt(1);
+               System.out.println("anspID : " + ansprechpartnerID);
             }
          }
          catch(SQLException ex)
@@ -480,9 +523,14 @@ public class Archivieren extends AbstractAction
          }
          ansprechpartnerID = adiuvoAnsprechpartner.getId();
       }
-      System.out.println(ansprechpartnerID);
+      System.out.println("hallo? : " +ansprechpartnerID);
    }
 
+   /**
+    * 
+    * Archiviert oder updatet ein Unternehmen in der Firebird-Datenbank.
+    *
+    */
    private void unternehmenArchivieren()
    {
       String update = "";
@@ -505,23 +553,20 @@ public class Archivieren extends AbstractAction
          + getTextFieldValue(unternehmenAdiuvoTextFields.get(10)) + ", "
          + "'NOW' );";
 
-         ConnectFirebirdDatabase.getInstance().update(update);
+         ResultSet rs = ConnectFirebirdDatabase.getInstance().insert(update);
          
-         String query = "SELECT id FROM organisation WHERE name = " + getTextFieldValue(unternehmenAdiuvoTextFields.get(0)) + " AND " +
-         "STRASSEHAUSNR = " + getTextFieldValue(unternehmenAdiuvoTextFields.get(1)) + " AND PLZ = " + getTextFieldValue(unternehmenAdiuvoTextFields.get(2)) + "";
-         System.out.println("Query : " + query);
-         ResultSet rs = ConnectFirebirdDatabase.getInstance().query(query);
          try
          {
             while(rs.next())
             {
-               unternehmensID = rs.getInt("id");
+               unternehmensID = rs.getInt(1);
+               System.out.println("untID : " + unternehmensID);
             }
          }
          catch(SQLException ex)
          {
             ex.printStackTrace();
-         }
+         }         
       }
       else
       {
@@ -636,7 +681,7 @@ public class Archivieren extends AbstractAction
          }
          unternehmensID = adiuvoUnternehmen.getId();
       }
-
+      System.out.println(unternehmensID);
    }
 
    /**

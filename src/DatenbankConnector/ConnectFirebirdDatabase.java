@@ -89,17 +89,49 @@ public class ConnectFirebirdDatabase
       }
       
       try
-      {         
+      {  
          String url = "jdbc:firebirdsql://" + host + ":" + port + "/" + pfad;
 
          con = DriverManager.getConnection(url, benutzername, passwort);
          stmt = con.createStatement();
          stmt.executeUpdate(q);
+
       }      
       catch(SQLException ex)
       {
          ex.printStackTrace();
+      }            
+   }
+   
+   public ResultSet insert(String q)
+   {
+      try
+      {
+         Class.forName("org.firebirdsql.jdbc.FBDriver");
+      }
+      catch(ClassNotFoundException e)
+      {
+         e.printStackTrace();
+      }
+      
+      try
+      {  
+         ResultSet generatedKeys;
+         String url = "jdbc:firebirdsql://" + host + ":" + port + "/" + pfad;
+
+         con = DriverManager.getConnection(url, benutzername, passwort);
+         stmt = con.createStatement();
+         stmt.executeUpdate(q, Statement.RETURN_GENERATED_KEYS );
+
+         generatedKeys = stmt.getGeneratedKeys();
+
+         return generatedKeys;
       }      
+      catch(SQLException ex)
+      {
+         ex.printStackTrace();
+         return null;
+      }            
    }
    
 

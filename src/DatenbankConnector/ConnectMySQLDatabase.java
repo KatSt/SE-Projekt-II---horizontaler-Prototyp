@@ -25,6 +25,11 @@ public class ConnectMySQLDatabase
    private static String port;// = "3306";
    private static String datenbankname;// = "awc";
    
+   /**
+    * 
+    * Konstruktor
+    *
+    */
    private ConnectMySQLDatabase()
    {
       try
@@ -37,6 +42,13 @@ public class ConnectMySQLDatabase
       }
    }
    
+   /**
+    * 
+    * Gibt die Instanz der Klasse zurück.
+    * Falls noch keine Instanz existiert wird eine erzeugt.
+    *
+    * @return   Instanz der Klasse.
+    */
    public synchronized static ConnectMySQLDatabase getInstance() 
    {
        if (connectMySqlDatabase == null) 
@@ -47,6 +59,13 @@ public class ConnectMySQLDatabase
    }
 
 
+   /**
+    * 
+    * Führt einen Abfragebefehl auf die Datenbank durch.
+    *
+    * @param q  SQL-Befehl
+    * @return   ResultSet mit Datensätzen
+    */
    public ResultSet query(String q)
    {
       try
@@ -74,6 +93,31 @@ public class ConnectMySQLDatabase
       }
       
       return null;
+   }
+   
+   public void update(String update)
+   {
+      try
+      {
+         Class.forName("com.mysql.jdbc.Driver");
+      }
+      catch(ClassNotFoundException e)
+      {
+         e.printStackTrace();
+      }
+      
+      try
+      {
+         String url = "jdbc:mysql://" + host + ":" + port + "/" + datenbankname;
+         con = DriverManager.getConnection(url, benutzername, passwort);
+         stmt = con.createStatement();
+         stmt.executeUpdate(update);
+      }
+      catch(SQLException ex)
+      {
+         ex.printStackTrace();
+      }
+      
    }
 
    /**

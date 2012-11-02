@@ -64,7 +64,7 @@ public class MainWindow extends JFrame
       JTable projektTable = new JTable(tableModel);
       projektTable.setEnabled(true);
 
-      projektTable.addMouseListener(new ProjektTableMouseListener(projektTable, projekttitel));
+      projektTable.addMouseListener(new ProjektTableMouseListener(projektTable, projekttitel, tableModel));
       JScrollPane projektScrollPane = new JScrollPane(projektTable);
       add(projektScrollPane, BorderLayout.CENTER);
       

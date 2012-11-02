@@ -30,7 +30,18 @@ public class ProjekttitelModel extends AbstractTableModel
       super();
       this.projekttitel = projekttitel;   
    }
-   
+
+   @SuppressWarnings("unchecked")
+   public Vector<Projektantrag> getProjekte()
+   {
+      return (Vector<Projektantrag>) projekttitel.clone();
+   }
+
+   public void deleteAntrag(Projektantrag p)
+   {
+      projekttitel.remove(p);
+      fireTableDataChanged();
+   }
 
    /* (non-Javadoc)
     * @see javax.swing.table.DefaultTableModel#getValueAt(int, int)

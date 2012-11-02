@@ -50,6 +50,7 @@ import Objekt.Projektantrag;
 import Objekt.Student;
 import Objekt.Unternehmen;
 import TableModel.AnsprechpartnerTableModel;
+import TableModel.ProjekttitelModel;
 import TableModel.UnternehmenTableModel;
 
 /**
@@ -88,7 +89,7 @@ public class EditProjektWindow extends JDialog
    private Ansprechpartner adiuvoAnsprechpartner;
    private Unternehmen adiuvoUnternehmen;
    private HashMap<Integer, Boolean> tabs = new HashMap<Integer, Boolean>();
-
+   private ProjekttitelModel model;
    
   
    /**
@@ -97,9 +98,10 @@ public class EditProjektWindow extends JDialog
     *
     * @param ptitel     Titel des ausgewählten Projekts.
     */
-   public EditProjektWindow(Projektantrag ptitel)
+   public EditProjektWindow(Projektantrag ptitel, ProjekttitelModel model)
    {
       super();
+      this.model = model;
       setTitle(ptitel.toString());
       setModal(true);
       projekt = ptitel;
@@ -174,20 +176,8 @@ public class EditProjektWindow extends JDialog
    {
       Box buttonBox = Box.createHorizontalBox();
 
-      JButton archivieren = new JButton(//new AbstractAction("test test test")
-//      {
-//         
-//         @Override
-//         public void actionPerformed(ActionEvent e)
-//         {
-//            for(JTextField field : student2AdiuvoTextFields)
-//            {
-//               System.out.println(field.getText());
-//            }
-//         }
-//      });
-            new Archivieren(tabs, student1AdiuvoTextFields, student2AdiuvoTextFields, student3AdiuvoTextFields, projektAdiuvoTextFields, projektAdiuvoTextAreas,
-            unternehmenAdiuvoTextFields, ansprechpartnerAdiuvoTextFields, adiuvoStudent1, adiuvoStudent2, adiuvoStudent3, getAdiuvoAnsprechpartner(), getAdiuvoUnternehmen(), this));
+      JButton archivieren = new JButton(new Archivieren(tabs, student1AdiuvoTextFields, student2AdiuvoTextFields, student3AdiuvoTextFields, projektAdiuvoTextFields, projektAdiuvoTextAreas,
+            unternehmenAdiuvoTextFields, ansprechpartnerAdiuvoTextFields, adiuvoStudent1, adiuvoStudent2, adiuvoStudent3, getAdiuvoAnsprechpartner(), getAdiuvoUnternehmen(), this, model));
       buttonBox.add(archivieren);
       buttonBox.add(Box.createHorizontalGlue());
 
@@ -1304,6 +1294,7 @@ public class EditProjektWindow extends JDialog
          emailFirebird.setText(adiuvoAnsprechpartnerVector.get(0).getEmail());
          faxFirebird.setText(adiuvoAnsprechpartnerVector.get(0).getFax());
          kommentarFirebird.setText(adiuvoAnsprechpartnerVector.get(0).getKommentar());
+         adiuvoAnsprechpartner = adiuvoAnsprechpartnerVector.get(0);
       }
       alleLeeren.setAction(new AlleFelderLeeren(ansprechpartnerAdiuvoTextFields, null));
       alleUebernehmen.setAction(new AlleFelderUebernehmen(alleAWCFelder, alleAdiuvoFelder, null, null));
@@ -1674,9 +1665,11 @@ public class EditProjektWindow extends JDialog
          telefonFirebird.setText(adiuvoUnternehmenVector.get(0).getTelefon());
          emailFirebird.setText(adiuvoUnternehmenVector.get(0).getEmail());
          internetseiteFirebird.setText(adiuvoUnternehmenVector.get(0).getInternetseite());
+         faxFirebird.setText(adiuvoUnternehmenVector.get(0).getFax());
          brancheFirebird.setText(adiuvoUnternehmenVector.get(0).getBranche());
          kommentarFirebird.setText(adiuvoUnternehmenVector.get(0).getKommentar());
          kommentarInternFirebird.setText(adiuvoUnternehmenVector.get(0).getKommentarIntern());
+         adiuvoUnternehmen = adiuvoUnternehmenVector.get(0);
       }
       
       unternehmenAuswahlTable.addMouseListener(new UnternehmenTableMouseListener(unternehmenAuswahlTable, adiuvoUnternehmenVector, 
@@ -1753,8 +1746,8 @@ public class EditProjektWindow extends JDialog
       
       rs = ConnectFirebirdDatabase.getInstance().query("SELECT * FROM ansprechpartner WHERE nachname = '" +
             projekt.getAnsprechpartner().getName() + "' AND vorname = '" + projekt.getAnsprechpartner().getVorname() + "'");
-      rs2 = ConnectFirebirdDatabase.getInstance().query("SELECT * FROM organisation WHERE name = '" + 
-            projekt.getAnsprechpartner().getUnternehmen().getName() + "'");
+      rs2 = ConnectFirebirdDatabase.getInstance().query("SELECT * FROM organisation WHERE name LIKE '" + 
+            projekt.getAnsprechpartner().getUnternehmen().getName() + "%'");
       try
       {
          while(rs.next())
@@ -1910,5 +1903,16 @@ public class EditProjektWindow extends JDialog
    public void setAdiuvoUnternehmen(Unternehmen adiuvoUnternehmen)
    {
       this.adiuvoUnternehmen = adiuvoUnternehmen;
+   }
+
+   /**
+    * Getter for property projekt.
+    * 
+    * @return Returns the projekt.
+    */
+   public Projektantrag getProjekt()
+   {
+      return projekt;
    }   
+   
 }

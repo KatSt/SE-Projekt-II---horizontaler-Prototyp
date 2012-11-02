@@ -88,7 +88,7 @@ public class MySQLDatenAuslesen extends AbstractAction
          String semester = semesterComboBox.getSelectedItem().toString();
          String jahr = jahrComboBox.getSelectedItem().toString();
          ResultSet rs = ConnectMySQLDatabase.getInstance().
-         query("SELECT modulid FROM modul WHERE modulname = '" + modul + "' AND semester = '" + 
+               query("SELECT modulid FROM modul WHERE modulname = '" + modul + "' AND semester = '" + 
                semester + "' AND jahr = '" + jahr + "'");      
          int modulid = -1;
          try
@@ -102,8 +102,9 @@ public class MySQLDatenAuslesen extends AbstractAction
          {
             ex.printStackTrace();
          }
+         ConnectMySQLDatabase.getInstance().update("UPDATE antrag SET archiviert = 0 WHERE archiviert is null");
          rs = ConnectMySQLDatabase.getInstance().query("SELECT antragid, titel, skizze, hintergrund, beschreibung, note, beginn, ansprechpartner1id" +
-               ", student1id, student2id, student3id FROM antrag WHERE modulid = " + modulid);
+               ", student1id, student2id, student3id FROM antrag WHERE modulid = " + modulid + " AND archiviert <> 1");
          try
          {
             while(rs.next())

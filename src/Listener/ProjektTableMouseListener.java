@@ -6,6 +6,7 @@ import java.util.Vector;
 import javax.swing.JTable;
 
 import Objekt.Projektantrag;
+import TableModel.ProjekttitelModel;
 import Windows.EditProjektWindow;
 
 
@@ -20,6 +21,7 @@ public class ProjektTableMouseListener implements MouseListener
 {
    private JTable source;
    private Vector<Projektantrag> titel;
+   private ProjekttitelModel model;
 
    /**
     * 
@@ -28,11 +30,12 @@ public class ProjektTableMouseListener implements MouseListener
     * @param source     Tabelle der Projekttiteln.
     * @param titel      Projekttiteln.
     */
-   public ProjektTableMouseListener(JTable source, Vector<Projektantrag> titel)
+   public ProjektTableMouseListener(JTable source, Vector<Projektantrag> titel, ProjekttitelModel model)
    {
       super();
       this.source = source;
       this.titel = titel;
+      this.model = model;
    }
 
    /**
@@ -46,7 +49,7 @@ public class ProjektTableMouseListener implements MouseListener
       {         
          Projektantrag projekt = titel.get(source.getSelectedRow());
          
-         EditProjektWindow editProjektWindow = new EditProjektWindow(projekt);
+         EditProjektWindow editProjektWindow = new EditProjektWindow(projekt,  model);
          editProjektWindow.setVisible(true);
       }      
    }

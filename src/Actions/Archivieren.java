@@ -12,10 +12,13 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import DatenbankConnector.ConnectFirebirdDatabase;
+import DatenbankConnector.ConnectMySQLDatabase;
 import Main.ReturnVal;
 import Objekt.Ansprechpartner;
+import Objekt.Projektantrag;
 import Objekt.Student;
 import Objekt.Unternehmen;
+import TableModel.ProjekttitelModel;
 import Windows.EditProjektWindow;
 
 /**
@@ -53,6 +56,7 @@ public class Archivieren extends AbstractAction
    private Boolean commitUnt = new Boolean(true);
    private Boolean commitAnt = new Boolean(true);
    private Boolean commitProj = new Boolean(true);
+   private ProjekttitelModel model;
 
    /**
     * 
@@ -76,7 +80,7 @@ public class Archivieren extends AbstractAction
    public Archivieren(HashMap<Integer, Boolean> tabs, Vector<JTextField> student1AdiuvoTextFields, Vector<JTextField> student2AdiuvoTextFields,
          Vector<JTextField> student3AdiuvoTextFields, Vector<JTextField> projektAdiuvoTextFields, Vector<JTextArea> projektAdiuvoTextAreas, Vector<JTextField> unternehmenAdiuvoTextFields, 
          Vector<JTextField> ansprechpartnerAdiuvoTextFields, Student adiuvoStudent1, Student adiuvoStudent2, Student adiuvoStudent3, Ansprechpartner adiuvoAnsprechpartner,
-         Unternehmen adiuvoUnternehmen, EditProjektWindow dialog)
+         Unternehmen adiuvoUnternehmen, EditProjektWindow dialog, ProjekttitelModel model)
    {
       super();
       putValue(NAME, "Archivieren");
@@ -94,6 +98,7 @@ public class Archivieren extends AbstractAction
 //      this.adiuvoAnsprechpartner = adiuvoAnsprechpartner;
 //      this.adiuvoUnternehmen = adiuvoUnternehmen;
       this.dialog = dialog;
+      this.model = model;
       
    }
 
@@ -115,7 +120,11 @@ public class Archivieren extends AbstractAction
             break;
          }
       }
-
+      if(projektAdiuvoTextFields.get(0).getText().isEmpty())
+      {
+         JOptionPane.showMessageDialog(null, "Bitte geben Sie einen Titel für das Projekt an!", "Error", JOptionPane.ERROR_MESSAGE);
+         execute = false;
+      }
       if(execute)
       {
          ConnectFirebirdDatabase.getInstance().openDatabaseConnection();
@@ -143,14 +152,22 @@ public class Archivieren extends AbstractAction
          if(commitUnt == false || commitAnt == false || commitStud1 == false || commitStud2 == false || commitStud3 == false || commitProj == false)
          {
             ConnectFirebirdDatabase.getInstance().commit(false);
+            JOptionPane.showMessageDialog(null, "Bei der Archivierung ist ein Fehler aufgetreten. Die Daten können nicht archiviert werden!", "Error", JOptionPane.ERROR_MESSAGE);
          }
          else
          {
             ConnectFirebirdDatabase.getInstance().commit(true);
+            for(Projektantrag p : model.getProjekte())
+            {
+               if(p.getId() == dialog.getProjekt().getId())
+               {
+                  model.deleteAntrag(p);
+               }
+            }
+            ConnectMySQLDatabase.getInstance().update("UPDATE antrag SET archiviert = 1 WHERE antragid = " + dialog.getProjekt().getId() + ";");
+            dialog.dispose();
          }
-         ConnectFirebirdDatabase.getInstance().closeConnection();
-
-         dialog.dispose();
+         ConnectFirebirdDatabase.getInstance().closeConnection();         
       }
 
    }
